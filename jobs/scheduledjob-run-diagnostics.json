@@ -1,0 +1,82 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "scheduledjob-diagnostics",
+        "annotations": {
+            "description": "Scheduled Task to Prune Images from Internal Docker Registry",
+            "iconClass": "icon-shadowman",
+            "tags": "management,scheduledjob,diagnostics"
+        }
+    },
+    "objects": [
+    {
+        "kind": "ScheduledJob",
+        "apiVersion": "batch/v2alpha1",
+        "metadata": {
+            "name": "${JOB_NAME}"
+        },
+        "spec": {
+            "schedule": "${SCHEDULE}",
+            "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "${JOB_NAME}",
+                                    "image": "openshift3/jenkins-slave-base-rhel7",
+                                    "command": [
+                                        "/bin/bash",
+                                        "-c",
+                                        "tmpfile=diagnostics-$(date +%s | sha256sum | base64 | head -c 32 ; echo) && oc adm diagnostics > /tmp/${tmpfile} || echo \"$(cat /tmp/diagnostics)\" | mail -s 'oc adm diagnostics failure!' ${JOB_ALERT_EMAIL}"
+                                    ]
+                                }
+                            ],
+                            "restartPolicy": "Never",
+                            "terminationGracePeriodSeconds": 30,
+                            "activeDeadlineSeconds": 500,
+                            "dnsPolicy": "ClusterFirst",
+                            "serviceAccountName": "${JOB_SERVICE_ACCOUNT}",
+                            "serviceAccount": "${JOB_SERVICE_ACCOUNT}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ],
+    "parameters": [
+        {
+            "name": "JOB_NAME",
+            "displayName": "Job Name",
+            "description": "Name of the Scheduled Job to Create.",
+            "value": "scheduledjob-diagnostics",
+            "required": true
+        },
+        {
+            "name": "SCHEDULE",
+            "displayName": "Cron Schedule",
+            "description": "Cron Schedule to Execute the Job",
+            "value": "@daily",
+            "required": true
+        },
+        {
+            "name": "JOB_SERVICE_ACCOUNT",
+            "displayName": "Service Account Name",
+            "description": "Name of the Service Account To Exeucte the Job As.",
+            "value": "default",
+            "required": true
+        },
+        {
+            "name": "JOB_ALERT_EMAIL",
+            "displayName": "Alert Email Address",
+            "description": "Email Address to which Failure Alerts will be sent",
+            "value": "administrator@example.com",
+            "required": true
+        }
+    ],
+    "labels": {
+        "template": "scheduledjob-diagnostics"
+    }
+}
