@@ -14,7 +14,7 @@
         "kind": "ScheduledJob",
         "apiVersion": "batch/v2alpha1",
         "metadata": {
-            "name": "${JOB_NAME}"
+            "name": "${JOB_NAME}-${PRUNE_TYPE}"
         },
         "spec": {
             "schedule": "${SCHEDULE}",
@@ -27,7 +27,7 @@
                         "spec": {
                             "containers": [
                                 {
-                                    "name": "${JOB_NAME}",
+                                    "name": "${JOB_NAME}-${PRUNE_TYPE}",
                                     "image": "openshift3/jenkins-slave-base-rhel7",
                                     "command": [
                                         "/bin/bash",
@@ -122,6 +122,20 @@
             "displayName": "Prune orphan resources",
             "description": "Prune builds or deployments where their associated BuildConfig or DeploymentConfig no longer exists",
             "value": "true",
+            "required": true
+        },
+        {
+            "name": "SUCCESS_JOBS_HISTORY_LIMIT",
+            "displayName": "Successful Job History Limit",
+            "description": "The number of successful jobs that will be retained",
+            "value": "5",
+            "required": true
+        },
+        {
+            "name": "FAILED_JOBS_HISTORY_LIMIT",
+            "displayName": "Failed Job History Limit",
+            "description": "The number of failed jobs that will be retained",
+            "value": "5",
             "required": true
         }
     ],
