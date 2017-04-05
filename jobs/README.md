@@ -19,7 +19,7 @@ Prior to instantiating the template, the following must be completed within a pr
 2. Grant cluster *edit* permissions on the service account created previously (requires elevated rights)
 
 	```
-	oc adm policy add-cluster-role-to-user edit system:serviceaccount:<project-name>:pruner
+	oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:<project-name>:pruner
 	```
 
 Instantiate the template
