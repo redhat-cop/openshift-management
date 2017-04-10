@@ -16,13 +16,13 @@ Prior to instantiating the template, the following must be completed within a pr
 	oc create serviceaccount pruner
 	```
 
-2. Grant cluster *edit* permissions on the service account created previously (requires elevated rights)
+2. Grant cluster *cluster-admin* permissions on the service account created previously (requires elevated rights)
 
 	```
 	oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:<project-name>:pruner
 	```
 
-Instantiate the template
+3. Instantiate the template
 
 ```
 oc process -v=JOB_SERVICE_ACCOUNT=pruner -f <template_file> | oc create -f-
@@ -30,3 +30,38 @@ oc process -v=JOB_SERVICE_ACCOUNT=pruner -f <template_file> | oc create -f-
 
 *Note: Some templates require additional parameters to be specified. Be sure to review each specific template contents prior to instantiation*
 
+### LDAP Group Synchronization
+
+The [scheduledjob-ldap-group-sync.json](scheduledjob-ldap-group-sync.json) facilitates routine [LDAP Group Synchronization](https://docs.openshift.com/container-platform/3.4/install_config/syncing_groups_with_ldap.html) synchronize groups defined in an LDAP store with OpenShift's internal group storage facility. 
+
+Prior to instantiating the template, the following must be completed within a project:
+
+1. Create a new service account
+
+	```
+	oc create serviceaccount sync
+	```
+
+2. Grant cluster *cluster-admin* permissions on the service account created previously (requires elevated rights)
+
+	```
+	oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:<project-name>:sync
+	```
+
+3. Configure the LDAP sync configuration file
+
+Synchronizing groups into OpenShift from LDAP requires a [configuration file](https://docs.openshift.com/container-platform/3.4/install_config/syncing_groups_with_ldap.html#configuring-ldap-sync) be provided to drive the entire synchronization process. The file will be stored in a [ConfigMap](https://docs.openshift.com/container-platform/3.4/dev_guide/configmaps.html) and injected into the running container when the job is executed.  
+
+Define the synchronization configuration in a file called *ldap-group-sync.yaml*
+
+Create a new ConfigMap called *ldap-sync* using the previously defined file:
+
+```
+oc create configmap ldap-sync --from-file=ldap-group-sync.yaml=ldap-group-sync.yaml
+```
+
+4. Instantiate the template
+
+```
+oc process -v=JOB_SERVICE_ACCOUNT=sync -v=CONFIGMAP_NAME=ldap-sync -v=CONFIGMAP_KEY=ldap-group-sync.yaml -f scheduledjob-ldap-group-sync.json | oc create -f-
+```
