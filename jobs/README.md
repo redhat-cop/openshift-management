@@ -50,7 +50,7 @@ Prior to instantiating the template, the following must be completed within a pr
 
 3. Configure the LDAP sync configuration file
 
-Synchronizing groups into OpenShift from LDAP requires a [configuration file](https://docs.openshift.com/container-platform/3.4/install_config/syncing_groups_with_ldap.html#configuring-ldap-sync) be provided to drive the entire synchronization process. The file will be stored in a [ConfigMap](https://docs.openshift.com/container-platform/3.4/dev_guide/configmaps.html) and injected into the running container when the job is executed.  
+Synchronizing groups into OpenShift from LDAP requires a [configuration file](https://docs.openshift.com/container-platform/latest/install_config/syncing_groups_with_ldap.html#configuring-ldap-sync) be provided to drive the entire synchronization process. The file will be stored in a [ConfigMap](https://docs.openshift.com/container-platform/latest/dev_guide/configmaps.html) and injected into the running container when the job is executed.
 
 Define the synchronization configuration in a file called *ldap-group-sync.yaml*
 
