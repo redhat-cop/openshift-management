@@ -36,14 +36,13 @@ The [scheduledjob-ldap-group-sync.json](scheduledjob-ldap-group-sync.json) facil
 
 This template makes several assumptions about your LDAP architecture and intentions of your group sync process, and is meant to showcase a common use case seen in the field. In this case, we use a top level group to designate all users and groups that will have access to OpenShift. We then create child groups to designate users who should have certain capabilities in OpenShift. A sample tree structure might look like:
 
-```
 openshift-users
-  &#8627; cluster-admins
-	  &#8627; bob
-	&#8627; app-team-a-devs
-	  &#8627; alice
-		&#8627; suzie
-```
+&nbsp;&nbsp;	&#8627; cluster-admins
+&nbsp;&nbsp;&nbsp;&nbsp;  &#8627; bob
+&nbsp;&nbsp;	&#8627; app-team-a-devs
+&nbsp;&nbsp;&nbsp;&nbsp;	&#8627; alice
+&nbsp;&nbsp;&nbsp;&nbsp;	&#8627; suzie
+
 We'll build a filter to return these groups in LDAP. Something like:
 ```
 (&(objectclass=ipausergroup)(memberOf=cn=openshift-users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))
