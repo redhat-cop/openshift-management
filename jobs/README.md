@@ -32,9 +32,11 @@ oc process -v=JOB_SERVICE_ACCOUNT=pruner -f <template_file> | oc create -f-
 
 ### LDAP Group Synchronization
 
-The [scheduledjob-ldap-group-sync.json](scheduledjob-ldap-group-sync.json) facilitates routine [LDAP Group Synchronization](https://docs.openshift.com/container-platform/3.4/install_config/syncing_groups_with_ldap.html) synchronize groups defined in an LDAP store with OpenShift's internal group storage facility.
+The [scheduledjob-ldap-group-sync.json](scheduledjob-ldap-group-sync.json) facilitates routine [LDAP Group Synchronization](https://docs.openshift.com/container-platform/latest/install_config/syncing_groups_with_ldap.html) synchronize groups defined in an LDAP store with OpenShift's internal group storage facility.
 
-This template makes several assumptions about your LDAP architecture and intentions of your group sync process, and is meant to showcase a common use case seen in the field. In this case, we use a top level group to designate all users and groups that will have access to OpenShift. We then create child groups to designate users who should have certain capabilities in OpenShift. A sample tree structure might look like:
+This template makes several assumptions about your LDAP architecture and intentions of your group sync process, and is meant to showcase a common use case seen in the field. It will likely need further updating to accomodate other sync strategies or LDAP architectures.
+
+In this case, we use a top level group to designate all users and groups that will have access to OpenShift. We then create child groups to designate users who should have certain capabilities in OpenShift. A sample tree structure might look like:
 
 ```
 openshift-users
