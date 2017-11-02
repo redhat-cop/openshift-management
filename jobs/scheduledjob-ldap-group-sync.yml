@@ -41,7 +41,7 @@ objects:
           userNameAttributes: [ uid ]
           tolerateMemberNotFoundErrors: true
           tolerateMemberOutOfScopeErrors: true
-- kind: "ScheduledJob"
+- kind: "CronJob"
   apiVersion: "batch/v2alpha1"
   metadata:
     name: "${JOB_NAME}"
