@@ -108,7 +108,7 @@ objects:
   - kind: ServiceAccount
     name: ${JOB_SERVICE_ACCOUNT}
   userNames:
-  - system:serviceaccount:cluster-ops:${JOB_SERVICE_ACCOUNT}
+  - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
@@ -116,6 +116,10 @@ objects:
     labels:
       template: "scheduledjob-ldap-group-sync"
 parameters:
+  - name: "NAMESPACE"
+    displayName: "Namespace"
+    description: "Name of the Namespace where to deploy the Scheduled Job"
+    required: true
   - name: "JOB_NAME"
     displayName: "Job Name"
     description: "Name of the Scheduled Job to Create."

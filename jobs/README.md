@@ -64,13 +64,14 @@ The `scheduledjob-ldap-group-sync` template creates several objects in OpenShift
 
 To instantiate the template, run the following.
 
-1. Create a project in which to host your jobs. Currently the template requires that it be created in a project called `cluster-ops`. This will become more flexible in future versions of OpenShift.
+1. Create a project in which to host your jobs.
 	```
-	oc new-project cluster-ops
+	oc new-project <project>
 	```
 2. Instantiate the template
 	```
 	oc process -f jobs/scheduledjob-ldap-group-sync.yml \
+	  -p NAMESPACE="<project name from previous step>"
 	  -p LDAP_URL="ldap://idm-2.etl.rht-labs.com:389" \
 	  -p LDAP_BIND_DN="uid=ldap-user,cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
 		-p LDAP_BIND_PASSWORD="password1" \
