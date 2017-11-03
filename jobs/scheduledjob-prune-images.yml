@@ -98,6 +98,7 @@ parameters:
 - name: "NAMESPACE"
   displayName: "Namespace where this is deployed"
   description: "Namespace where this is deployed."
+  value: "cluster-ops"
   required: true
 labels:
   template: scheduledjob-prune-images

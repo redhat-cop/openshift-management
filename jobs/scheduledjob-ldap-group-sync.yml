@@ -119,6 +119,7 @@ parameters:
   - name: "NAMESPACE"
     displayName: "Namespace"
     description: "Name of the Namespace where to deploy the Scheduled Job"
+    value: "cluster-ops"
     required: true
   - name: "JOB_NAME"
     displayName: "Job Name"
