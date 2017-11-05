@@ -2,16 +2,16 @@
 kind: Template
 apiVersion: v1
 metadata:
-  name: scheduledjob-prune-builds-deployments
+  name: cronjob-prune-images
   annotations:
-    description: Scheduled Task to Prune Builds or Deployments
+    description: Scheduled Task to Prune Images from Internal Docker Registry
     iconClass: icon-shadowman
-    tags: management,scheduledjob,prune,builds,deployments
+    tags: management,cronjob,prune,images
 objects:
 - kind: CronJob
   apiVersion: batch/v2alpha1
   metadata:
-    name: "${JOB_NAME}-${PRUNE_TYPE}"
+    name: "${JOB_NAME}"
   spec:
     schedule: "${SCHEDULE}"
     concurrencyPolicy: Forbid
@@ -22,22 +22,18 @@ objects:
         template:
           spec:
             containers:
-            - name: "${JOB_NAME}-${PRUNE_TYPE}"
+            - name: "${JOB_NAME}"
               image: openshift3/jenkins-slave-base-rhel7
               command:
               - "/bin/bash"
               - "-c"
-              - oc adm prune ${PRUNE_TYPE} --keep-complete=$KEEP_COMPLETE --keep-failed=$KEEP_FAILED
-                --keep-younger-than=$KEEP_YOUNGER_THAN --orphans=$PRUNE_ORPHANS --confirm
+              - oc adm prune images --keep-tag-revisions=$IMAGE_PRUNE_KEEP_TAG_REVISIONS
+                --keep-younger-than=$IMAGE_PRUNE_KEEP_YOUNGER_THAN --confirm
               env:
-              - name: KEEP_COMPLETE
-                value: "${KEEP_COMPLETE}"
-              - name: KEEP_FAILED
-                value: "${KEEP_FAILED}"
-              - name: KEEP_YOUNGER_THAN
-                value: "${KEEP_YOUNGER_THAN}"
-              - name: PRUNE_ORPHANS
-                value: "${PRUNE_ORPHANS}"
+              - name: IMAGE_PRUNE_KEEP_TAG_REVISIONS
+                value: "${IMAGE_PRUNE_KEEP_TAG_REVISIONS}"
+              - name: IMAGE_PRUNE_KEEP_YOUNGER_THAN
+                value: "${IMAGE_PRUNE_KEEP_YOUNGER_THAN}"
             restartPolicy: Never
             terminationGracePeriodSeconds: 30
             activeDeadlineSeconds: 500
@@ -46,9 +42,9 @@ objects:
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
 - kind: ClusterRoleBinding
   metadata:
-    name: system:build-pruners
+    name: system:image-pruners
     labels:
-      template: "scheduledjob-prune-builds"
+      template: "cronjob-prune-images"
   roleRef:
     name: cluster-admin
   subjects:
@@ -60,12 +56,12 @@ objects:
   metadata:
     name: ${JOB_SERVICE_ACCOUNT}
     labels:
-      template: "scheduledjob-prune-builds"
+      template: "cronjob-prune-images"
 parameters:
 - name: JOB_NAME
   displayName: Job Name
   description: Name of the Scheduled Job to Create.
-  value: scheduledjob-prune-resources
+  value: cronjob-prune-images
   required: true
 - name: SCHEDULE
   displayName: Cron Schedule
@@ -77,33 +73,17 @@ parameters:
   description: Name of the Service Account To Exeucte the Job As.
   value: pruner
   required: true
-- name: PRUNE_TYPE
-  displayName: Type of pruning action (builds|deployments)
-  description: Type of pruning action that will be performed. Must specify 'builds'
-    or 'deployments'
-  value: ''
+- name: IMAGE_PRUNE_KEEP_TAG_REVISIONS
+  displayName: Number of Tag Revisions
+  description: Specify the number of image revisions for a tag in an image stream
+    that will be preserved.
+  value: '3'
   required: true
-- name: KEEP_COMPLETE
-  displayName: Number of Completed Items
-  description: Number of completed items that will not be considered for pruning.
-  value: '5'
-  required: true
-- name: KEEP_FAILED
-  displayName: Number of Failed Items
-  description: Number of failed items that will not be considered for pruning.
-  value: '1'
-  required: true
-- name: KEEP_YOUNGER_THAN
-  displayName: Minimum Age of the resource
-  description: The minimum age of the resource for it to be considered a candidate
-    for pruning
-  value: 60m
-  required: true
-- name: PRUNE_ORPHANS
-  displayName: Prune orphan resources
-  description: Prune builds or deployments where their associated BuildConfig or DeploymentConfig
-    no longer exists
-  value: 'true'
+- name: IMAGE_PRUNE_KEEP_YOUNGER_THAN
+  displayName: Minimum Age of an Image
+  description: The minimum age of an image for it to be considered a candidate for
+    pruning
+  value: 1h0m0s
   required: true
 - name: SUCCESS_JOBS_HISTORY_LIMIT
   displayName: Successful Job History Limit
@@ -121,4 +101,4 @@ parameters:
   value: "cluster-ops"
   required: true
 labels:
-  template: scheduledjob-prune-builds-deployments
+  template: cronjob-prune-images

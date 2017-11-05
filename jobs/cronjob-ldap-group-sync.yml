@@ -2,17 +2,17 @@
 kind: "Template"
 apiVersion: "v1"
 metadata:
-  name: "scheduledjob-ldap-group-sync"
+  name: "cronjob-ldap-group-sync"
   annotations:
     description: "Scheduled Task to Perform LDAP Group Synchronization"
     iconClass: "icon-shadowman"
-    tags: "management,scheduledjob,ldap,group,sync"
+    tags: "management,cronjob,ldap,group,sync"
 objects:
 - kind: ConfigMap
   metadata:
     name: ldap-config
     labels:
-      template: "scheduledjob-ldap-group-sync"
+      template: "cronjob-ldap-group-sync"
   apiVersion: v1
   data:
     ldap-sync.yml: |
@@ -46,7 +46,7 @@ objects:
   metadata:
     name: "${JOB_NAME}"
     labels:
-      template: "scheduledjob-ldap-group-sync"
+      template: "cronjob-ldap-group-sync"
   spec:
     schedule: "${SCHEDULE}"
     concurrencyPolicy: "Forbid"
@@ -84,7 +84,7 @@ objects:
   metadata:
     name: ldap-group-syncer
     labels:
-      template: "scheduledjob-ldap-group-sync"
+      template: "cronjob-ldap-group-sync"
   rules:
     - apiGroups:
         - ""
@@ -101,7 +101,7 @@ objects:
   metadata:
     name: system:ldap-group-syncers
     labels:
-      template: "scheduledjob-ldap-group-sync"
+      template: "cronjob-ldap-group-sync"
   roleRef:
     name: ldap-group-syncer
   subjects:
@@ -114,7 +114,7 @@ objects:
   metadata:
     name: ${JOB_SERVICE_ACCOUNT}
     labels:
-      template: "scheduledjob-ldap-group-sync"
+      template: "cronjob-ldap-group-sync"
 parameters:
   - name: "NAMESPACE"
     displayName: "Namespace"
@@ -124,7 +124,7 @@ parameters:
   - name: "JOB_NAME"
     displayName: "Job Name"
     description: "Name of the Scheduled Job to Create."
-    value: "scheduledjob-ldap-group-sync"
+    value: "cronjob-ldap-group-sync"
     required: true
   - name: "SCHEDULE"
     displayName: "Cron Schedule"
@@ -179,4 +179,4 @@ parameters:
     required: true
     value: "cn=users,cn=accounts,dc=myorg,dc=example,dc=com"
 labels:
-  template: "scheduledjob-ldap-group-sync"
+  template: "cronjob-ldap-group-sync"
