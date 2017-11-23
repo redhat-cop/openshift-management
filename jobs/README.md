@@ -88,3 +88,36 @@ You can clean up the objects created by the template with the following command.
 ```
 oc delete scheduledjob,configmap,clusterrole,clusterrolebinding,sa -l template=scheduledjob-ldap-group-sync
 ```
+
+### AWS EBS backed PVs snapshots
+
+The [cronjob-aws-ocp-snap.yaml](cronjob-aws-ocp-snap.yaml) facilitates [aws snapshots](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-creating-snapshot.html) for the Persistent Volumes created on OCP which use EBS as the backend storage.
+
+#### Setup
+
+The `cronjob-aws-ocp-snap.yaml` template creates several objects in OpenShift.
+
+* A custom `BuildConfig` that will create the required container to run the job from
+* A custom `ClusterRole` that defines the proper permissions to query PVCs in the Cluster
+* A `ServiceAccount` we will use with 'aws cli' to perform the snapshots
+* A `ClusterRoleBinding` that maps the `ServiceAccount` to the `ClusterRole`
+* A `CronJob` to run the snapshots on a schedule
+* A `Secret` to store the 'aws cli' required credentials and config to connect to your AWS account
+
+To instantiate the template, run the following.
+
+1. Create a project in which to host your jobs.
+	```
+	oc new-project <project>
+	```
+2. Instantiate the template
+	```
+	oc process -f jobs/cronjob-aws-ocp-snap.yaml \
+	  -p NAMESPACE="<project name from previous step>"
+	  -p AWS_ACCESS_KEY_ID="AWS Access Key ID (base64 format)" \
+	  -p AWS_SECRET_ACCESS_KEY="WS Secret Access Key ID (base64 format)" \
+		-p AWS_REGION="AWS Region where EBS objects reside (base64 format)" \
+		-p NSPACE="Namespace where Persistent Volumes are defined (can be ALL)" \
+		-p VOL="Persistent Volume Claim name (can be ALL)" \
+		| oc create -f-
+	```
