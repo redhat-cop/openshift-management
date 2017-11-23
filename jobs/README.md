@@ -113,7 +113,7 @@ To instantiate the template, run the following.
 2. Instantiate the template
 	```
 	oc process -f jobs/cronjob-aws-ocp-snap.yaml \
-	  -p NAMESPACE="<project name from previous step>"
+	  -p NAMESPACE="<project name from previous step>" \
 	  -p AWS_ACCESS_KEY_ID="AWS Access Key ID (base64 format)" \
 	  -p AWS_SECRET_ACCESS_KEY="WS Secret Access Key ID (base64 format)" \
 		-p AWS_REGION="AWS Region where EBS objects reside (base64 format)" \
