@@ -114,9 +114,9 @@ To instantiate the template, run the following.
 	```
 	oc process -f jobs/cronjob-aws-ocp-snap.yaml \
 	  -p NAMESPACE="<project name from previous step>" \
-	  -p AWS_ACCESS_KEY_ID="AWS Access Key ID (base64 format)" \
-	  -p AWS_SECRET_ACCESS_KEY="WS Secret Access Key ID (base64 format)" \
-		-p AWS_REGION="AWS Region where EBS objects reside (base64 format)" \
+	  -p AWS_ACCESS_KEY_ID="AWS Access Key ID" \
+	  -p AWS_SECRET_ACCESS_KEY="WS Secret Access Key ID" \
+		-p AWS_REGION="AWS Region where EBS objects reside" \
 		-p NSPACE="Namespace where Persistent Volumes are defined (can be ALL)" \
 		-p VOL="Persistent Volume Claim name (can be ALL)" \
 		| oc create -f-

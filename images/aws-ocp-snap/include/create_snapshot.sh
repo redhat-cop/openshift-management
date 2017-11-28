@@ -17,7 +17,7 @@ case "$NAMESPACE" in
             NOVOL=$(grep "No resources" $CHKFILE | wc -l)
             if [ ! $RESULT -eq 0 ] || [ $NOVOL -gt 0 ]; then
                 echo "Error while getting EBS volumes information"
-                exit 2
+                exit 0
             else
                 oc describe pv $(oc get pv --no-headers | awk {'print $1'}) | grep VolumeID | cut -d "/" -f 4 > $TMPFILE
                 while read vol
@@ -41,7 +41,7 @@ case "$NAMESPACE" in
                             echo "Error while getting EBS volumes information"
                             exit 2
                         else
-                            oc describe pv $(oc get pvc --no-headers -n $NAMESPACE | awk {'print $3'}) | grep VolumeID | cut -d "/" -f 4 > $TMPFILE
+                            oc get pv $(oc get pvc -n $NAMESPACE -o jsonpath='{ .items[*].spec.volumeName }') -o jsonpath='{ range .items[*]}{.spec.awsElasticBlockStore.volumeID }{"\n"}{end}' |  cut -d "/" -f 4 > $TMPFILE
                             while read vol
                             do
                                 echo "Creating snapshot for EBS volume " $vol

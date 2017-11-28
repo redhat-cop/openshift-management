@@ -44,7 +44,7 @@ objects:
     name: aws-secret
     labels:
       template: aws-ocp-snap
-  data:
+  stringData:
     key_id: ${AWS_ACCESS_KEY_ID}
     access_key: ${AWS_SECRET_ACCESS_KEY}
     region: ${AWS_REGION}
@@ -175,18 +175,18 @@ parameters:
   value: "cluster-maintenance"
   required: true
 - name: AWS_ACCESS_KEY_ID
-  displayName: AWS Access Key ID (base64)
-  description: AWS Access Key ID to be used to create the snapshots (base64)
+  displayName: AWS Access Key ID
+  description: AWS Access Key ID to be used to create the snapshots
   value: ""
   required: true
 - name: AWS_SECRET_ACCESS_KEY
-  displayName: AWS Secret Access Key ID (base64)
-  description: AWS Secret Access Key ID to be used to create the snapshots (base64)
+  displayName: AWS Secret Access Key ID
+  description: AWS Secret Access Key ID to be used to create the snapshots
   value: ""
   required: true
 - name: AWS_REGION
-  displayName: AWS Region (base64)
-  description: AWS Region where EBS objects reside (base64)
+  displayName: AWS Region
+  description: AWS Region where EBS objects reside
   value: ""
   required: true
 - name: NSPACE
