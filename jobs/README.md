@@ -4,6 +4,40 @@ This directory contains a collection of [jobs](https://docs.openshift.com/contai
 
 The rest of this document describes the specific configurations that are applicable to the execution of certain jobs contained within this directory.
 
+### Git Backup
+
+The [cronjob-git-sync.json](cronjob-git-sync.json) backs up one repository to another repository with all of it's branches on a regular basis.
+
+Prior to instantiating the template, the following must be completed:
+
+1. Two repositories created.
+
+2. [SSH key created](https://help.github.com/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent/) and put into base64 form for the `GIT_PRIVATE_KEY` param. Which can be done using:
+
+	```
+	cat <private_key> | base64
+	```
+
+2. The repository that will be pushed to, needs to have the public key added.
+
+3. Instantiate the template
+
+    ```
+    oc process --param-file=params -f <template_file> | oc create -f-
+    ```
+
+   where the parameters file might look like this:
+    ```
+    GIT_PRIVATE_KEY=GIANTENCODEDSTRINGHERE
+    GIT_HOST=github.com
+    GIT_REPO=pcarney8/example.git
+    GIT_SYNC_HOST=gitlab.com
+    GIT_SYNC_PORT=2222
+    GIT_SYNC_REPO=pcarney8/example-backup.git
+    SCHEDULE=*/5 * * * *
+    JOB_NAME=example-backup-job
+    ```
+
 ### Pruning Resources
 
 The [scheduledjob-prune-images.json](scheduledjob-prune-images.json) facilitates [image pruning](https://docs.openshift.com/container-platform/latest/admin_guide/pruning_resources.html#pruning-images) of the integrated docker registry while the [scheduledjob-prune-builds-deployments.json](scheduledjob-prune-builds-deployments.json) facilitates pruning [builds](https://docs.openshift.com/container-platform/latest/admin_guide/pruning_resources.html#pruning-builds) and [deployments](https://docs.openshift.com/container-platform/latest/admin_guide/pruning_resources.html#pruning-deployments) on a regular basis.
