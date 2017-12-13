@@ -1,0 +1,135 @@
+---
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: "cronjob-git-sync"
+  annotations:
+    description: "Scheduled Task to Perform Git Repo Synchronization"
+    iconClass: "icon-shadowman"
+    tags: "management,cronjob,git,sync"
+objects:
+- kind: Secret
+  apiVersion: "v1"
+  metadata:
+    name: "${SSH_KEY_SECRET_NAME}"
+  type: Opaque
+  data:
+    ssh-privatekey: ${GIT_PRIVATE_KEY} 
+- kind: "CronJob"
+  apiVersion: "batch/v2alpha1"
+  metadata:
+    name: "${JOB_NAME}"
+    labels:
+      template: "cronjob-git-sync"
+  spec:
+    schedule: "${SCHEDULE}"
+    concurrencyPolicy: "Forbid"
+    successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
+    failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            volumes:
+            - name: secret-volume
+              secret:
+                secretName: "${SSH_KEY_SECRET_NAME}"
+            containers:
+              - name: "${JOB_NAME}"
+                image: "openshift3/python-33-rhel7"
+                env:
+                - name: GIT_COMMITTER_NAME
+                  value: hello
+                - name: GIT_COMMITTER_EMAIL
+                  value: hello@world.com
+                command:
+                  - "/bin/bash"
+                  - "-c"
+                  - |
+                    mkdir ~/.ssh
+                    chmod 700 ~/.ssh
+                    printf 'host ${GIT_HOST}\n PreferredAuthentications publickey\n IdentitiesOnly yes\n HostName ${GIT_HOST}\n IdentityFile /etc/secret-volume/ssh-privatekey\n User git\n' >> ~/.ssh/config
+                    printf 'host ${GIT_SYNC_HOST}\n PreferredAuthentications publickey\n IdentitiesOnly yes\n HostName ${GIT_SYNC_HOST}\n IdentityFile /etc/secret-volume/ssh-privatekey\n User git\n' >> ~/.ssh/config
+                    chmod 400 ~/.ssh/config
+                    ssh-keyscan -p ${GIT_SYNC_PORT} -H ${GIT_SYNC_HOST} >> ~/.ssh/known_hosts
+                    ssh-keyscan -p ${GIT_PORT} -H ${GIT_HOST} >> ~/.ssh/known_hosts
+                    USER_ID=$(id -u)
+                    GROUP_ID=$(id -g)
+                    echo "gitsync:x:${USER_ID}:${GROUP_ID}:Git Sync User:${HOME}:/sbin/nologin" > ~/passwd
+                    echo "root:x:${GROUP_ID}:" > ~/group
+                    LD_PRELOAD=libnss_wrapper.so NSS_WRAPPER_PASSWD=~/passwd NSS_WRAPPER_GROUP=~/group git clone ssh://git@${GIT_HOST}:${GIT_PORT}/${GIT_REPO} /tmp/temp
+                    cd /tmp/temp
+                    for branch in $(git branch -a | grep remotes | grep -v HEAD | grep -v master); do git branch --track ${branch#remotes/origin/} $branch; done
+                    LD_PRELOAD=libnss_wrapper.so NSS_WRAPPER_PASSWD=~/passwd NSS_WRAPPER_GROUP=~/group git remote add backup ssh://git@${GIT_SYNC_HOST}:${GIT_SYNC_PORT}/${GIT_SYNC_REPO}
+                    LD_PRELOAD=libnss_wrapper.so NSS_WRAPPER_PASSWD=~/passwd NSS_WRAPPER_GROUP=~/group git push -f --all backup
+                volumeMounts:
+                - name: secret-volume
+                  readOnly: true
+                  mountPath: "/etc/secret-volume"
+            restartPolicy: "Never"
+            terminationGracePeriodSeconds: 30
+            activeDeadlineSeconds: 500
+            dnsPolicy: "ClusterFirst"
+parameters:
+  - name: "JOB_NAME"
+    displayName: "Job Name"
+    description: "Name of the Scheduled Job to Create."
+    value: "cronjob-git-sync"
+    required: true
+  - name: "SCHEDULE"
+    displayName: "Cron Schedule"
+    description: "Cron Schedule to Execute the Job"
+    value: "@hourly"
+    required: true
+  - name: "KEEP_COMPLETE"
+    displayName: "Number of Completed Items"
+    description: "Number of completed items that will not be considered for pruning."
+    value: "5"
+    required: true
+  - name: "SUCCESS_JOBS_HISTORY_LIMIT"
+    displayName: "Successful Job History Limit"
+    description: "The number of successful jobs that will be retained"
+    value: "5"
+    required: true
+  - name: "FAILED_JOBS_HISTORY_LIMIT"
+    displayName: "Failed Job History Limit"
+    description: "The number of failed jobs that will be retained"
+    value: "5"
+    required: true
+  - name: "GIT_HOST"
+    displayName: "Git server host name"
+    description: "Git server host name"
+    required: true
+  - name: "GIT_PORT"
+    displayName: "Port of the main git server"
+    description: "Port of the main git server, NEED TO MAKE SURE THIS MATCHES THE PROTOCOL"
+    required: true
+    value: "22" 
+  - name: "GIT_REPO"
+    displayName: "Git server repo path"
+    description: "Git server repo path, i.e. userName/repo-name.git"
+    required: true
+  - name: "GIT_SYNC_HOST"
+    displayName: "Git backup server host name of the server to be synced to"
+    description: "Git backup server host name of the server to be synced to, used to add to known hosts"
+    required: true
+  - name: "GIT_SYNC_PORT"
+    displayName: "Port of the server to be synced to"
+    description: "Port of the server to be synced to, used to add to known hosts"
+    required: true
+    value: "22"
+  - name: "GIT_SYNC_REPO"
+    displayName: "Git backup server repo path"
+    description: "Git backup server repo path, i.e. userName/repo-name.git"
+    required: true
+  - name: "GIT_PRIVATE_KEY"
+    displayName: "SSH private key for the Git server to be synced to"
+    description: "SSH private key for the Git server to be synced to, NOTE: no passphrase! and make sure it is encoded! You can do this by manually adding via the UI and then go to the secret and click 'Edit YAML', this will show the encoded secret under 'data: ssh-privatekey:' you don't need to include the '>-'"
+    required: true
+  - name: "SSH_KEY_SECRET_NAME"
+    displayName: "Name of the ssh key secret"
+    description: "Name of the ssh key secret"
+    required: true
+    value: "ssh-key-secret"
+labels:
+  template: "cronjob-git-sync"
