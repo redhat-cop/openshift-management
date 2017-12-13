@@ -1,0 +1,124 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: cronjob-prune-builds-deployments
+  annotations:
+    description: Scheduled Task to Prune Builds or Deployments
+    iconClass: icon-shadowman
+    tags: management,cronjob,prune,builds,deployments
+objects:
+- kind: CronJob
+  apiVersion: batch/v2alpha1
+  metadata:
+    name: "${JOB_NAME}-${PRUNE_TYPE}"
+  spec:
+    schedule: "${SCHEDULE}"
+    concurrencyPolicy: Forbid
+    successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
+    failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            containers:
+            - name: "${JOB_NAME}-${PRUNE_TYPE}"
+              image: openshift3/jenkins-slave-base-rhel7
+              command:
+              - "/bin/bash"
+              - "-c"
+              - oc adm prune ${PRUNE_TYPE} --keep-complete=$KEEP_COMPLETE --keep-failed=$KEEP_FAILED
+                --keep-younger-than=$KEEP_YOUNGER_THAN --orphans=$PRUNE_ORPHANS --confirm
+              env:
+              - name: KEEP_COMPLETE
+                value: "${KEEP_COMPLETE}"
+              - name: KEEP_FAILED
+                value: "${KEEP_FAILED}"
+              - name: KEEP_YOUNGER_THAN
+                value: "${KEEP_YOUNGER_THAN}"
+              - name: PRUNE_ORPHANS
+                value: "${PRUNE_ORPHANS}"
+            restartPolicy: Never
+            terminationGracePeriodSeconds: 30
+            activeDeadlineSeconds: 500
+            dnsPolicy: ClusterFirst
+            serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
+            serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+- kind: ClusterRoleBinding
+  metadata:
+    name: system:build-pruners
+    labels:
+      template: "cronjob-prune-builds"
+  roleRef:
+    name: cluster-admin
+  subjects:
+  - kind: ServiceAccount
+    name: ${JOB_SERVICE_ACCOUNT}
+  userNames:
+  - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
+- kind: ServiceAccount
+  metadata:
+    name: ${JOB_SERVICE_ACCOUNT}
+    labels:
+      template: "cronjob-prune-builds"
+parameters:
+- name: JOB_NAME
+  displayName: Job Name
+  description: Name of the Scheduled Job to Create.
+  value: cronjob-prune-resources
+  required: true
+- name: SCHEDULE
+  displayName: Cron Schedule
+  description: Cron Schedule to Execute the Job
+  value: 0 0 * * *
+  required: true
+- name: JOB_SERVICE_ACCOUNT
+  displayName: Service Account Name
+  description: Name of the Service Account To Exeucte the Job As.
+  value: pruner
+  required: true
+- name: PRUNE_TYPE
+  displayName: Type of pruning action (builds|deployments)
+  description: Type of pruning action that will be performed. Must specify 'builds'
+    or 'deployments'
+  value: ''
+  required: true
+- name: KEEP_COMPLETE
+  displayName: Number of Completed Items
+  description: Number of completed items that will not be considered for pruning.
+  value: '5'
+  required: true
+- name: KEEP_FAILED
+  displayName: Number of Failed Items
+  description: Number of failed items that will not be considered for pruning.
+  value: '1'
+  required: true
+- name: KEEP_YOUNGER_THAN
+  displayName: Minimum Age of the resource
+  description: The minimum age of the resource for it to be considered a candidate
+    for pruning
+  value: 60m
+  required: true
+- name: PRUNE_ORPHANS
+  displayName: Prune orphan resources
+  description: Prune builds or deployments where their associated BuildConfig or DeploymentConfig
+    no longer exists
+  value: 'true'
+  required: true
+- name: SUCCESS_JOBS_HISTORY_LIMIT
+  displayName: Successful Job History Limit
+  description: The number of successful jobs that will be retained
+  value: '5'
+  required: true
+- name: FAILED_JOBS_HISTORY_LIMIT
+  displayName: Failed Job History Limit
+  description: The number of failed jobs that will be retained
+  value: '5'
+  required: true
+- name: "NAMESPACE"
+  displayName: "Namespace where this is deployed"
+  description: "Namespace where this is deployed."
+  value: "cluster-ops"
+  required: true
+labels:
+  template: cronjob-prune-builds-deployments
