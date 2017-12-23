@@ -19,7 +19,7 @@ case "$NAMESPACE" in
                 echo "Error while getting EBS volumes information"
                 exit 0
             else
-                oc describe pv $(oc get pv --no-headers | awk {'print $1'}) | grep VolumeID | cut -d "/" -f 4 > $TMPFILE
+                oc get pv -o=custom-columns=NAME:.spec.awsElasticBlockStore.volumeID --no-headers | cut -d "/" -f 4 > $TMPFILE
                 while read vol
                 do
                     echo "Creating snapshot for EBS volume " $vol
@@ -41,7 +41,7 @@ case "$NAMESPACE" in
                             echo "Error while getting EBS volumes information"
                             exit 2
                         else
-                            oc get pv $(oc get pvc -n $NAMESPACE -o jsonpath='{ .items[*].spec.volumeName }') -o jsonpath='{ range .items[*]}{.spec.awsElasticBlockStore.volumeID }{"\n"}{end}' |  cut -d "/" -f 4 > $TMPFILE
+                            oc get pv $(oc get pvc -n $NAMESPACE -o=custom-columns=NAME:.spec.volumeName --no-headers) -o=custom-columns=NAME:.spec.awsElasticBlockStore.volumeID --no-headers | cut -d "/" -f 4 > $TMPFILE
                             while read vol
                             do
                                 echo "Creating snapshot for EBS volume " $vol
@@ -55,7 +55,7 @@ case "$NAMESPACE" in
                             echo "Error while getting EBS volumes information"
                             exit 2
                         else
-                            oc describe pv $(oc get pvc --no-headers $VOLUME -n $NAMESPACE | awk {'print $3'}) | grep VolumeID | cut -d "/" -f 4 > $TMPFILE
+                            oc get pv $(oc get pvc $VOLUME -n $NAMESPACE -o=custom-columns=NAME:.spec.volumeName --no-headers) -o=custom-columns=NAME:.spec.awsElasticBlockStore.volumeID --no-headers | cut -d "/" -f 4
                             NOVOL=$(grep "No resources found" $TMPFILE | wc -l)
                             if [ $NOVOL -gt 0 ];then
                                 echo "There are no presistent volumes configured"
