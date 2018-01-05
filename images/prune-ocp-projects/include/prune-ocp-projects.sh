@@ -41,11 +41,9 @@ do
   temp=`oc get project ${project} -o=custom-columns=time:.metadata.creationTimestamp --no-headers`
   projects[${project}]=`date -d "${temp}" +%s`
 
-  echo "del: ${purgetime}: creationTimeEpocSec: ${project}: ${projects[${project}]}"
   if [ ${purgetime} -gt ${projects[${project}]} ];
   then
-     echo "oc delete"
-  else
-     echo "No delete keep"
+     echo "Deleting project ${project}"
+     oc delete project ${project}
   fi
 done
