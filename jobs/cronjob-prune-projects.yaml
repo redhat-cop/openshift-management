@@ -1,0 +1,146 @@
+---
+apiVersion: v1
+kind: Template
+metadata:
+  name: cronjob-prune-projects
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NAME}
+    labels:
+      template: cronjob-prune-projects
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: ${NAME}
+    labels:
+      template: cronjob-prune-projects
+  spec:
+    completionDeadlineSeconds: "1800"
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}:latest
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/oybed/openshift-management.git
+        ref: prune
+      contextDir: /images/prune-ocp-projects
+    strategy:
+      dockerStrategy:
+        from:
+          kind: DockerImage
+          name: centos:7
+      type: Docker
+    triggers:
+    - type: ConfigChange
+- apiVersion: batch/v2alpha1
+  kind: CronJob
+  metadata:
+    name: "${JOB_NAME}"
+    labels:
+      template: cronjob-prune-projects
+  spec:
+    schedule: "${SCHEDULE}"
+    concurrencyPolicy: Forbid
+    successfulJobsHistoryLimit: "${SUCCESS_JOBS_HISTORY_LIMIT}"
+    failedJobsHistoryLimit: "${FAILED_JOBS_HISTORY_LIMIT}"
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            containers:
+            - name: "${JOB_NAME}"
+              image: docker-registry.default.svc:5000/${NAMESPACE}/${NAME}:latest
+              command:
+                - "/bin/bash"
+                - "-c"
+                - "/usr/local/bin/prune-ocp-projects.sh"
+              env:
+              - name: PROJECT_EXCLUDE_USER
+                value: "${PROJECT_EXCLUDE_USER}"
+              - name: PROJECT_EXCLUDE_SYSTEM
+                value: "${PROJECT_EXCLUDE_SYSTEM}"
+              - name: TIMESTAMP_HOURS_AGO
+                value: "${TIMESTAMP_HOURS_AGO}"
+            restartPolicy: Never
+            terminationGracePeriodSeconds: 30
+            activeDeadlineSeconds: 500
+            dnsPolicy: ClusterFirst
+            serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
+            serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+- apiVersion: v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: system:project-pruners
+    labels:
+      template: cronjob-prune-projects
+  roleRef:
+    name: cluster-admin
+  subjects:
+  - kind: ServiceAccount
+    name: ${JOB_SERVICE_ACCOUNT}
+  userNames:
+  - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: ${JOB_SERVICE_ACCOUNT}
+    labels:
+      template: cronjob-prune-projects
+parameters:
+- description: The name assigned to all of the frontend objects defined in this template.
+  displayName: Name
+  name: NAME
+  required: true
+  value: prune-ocp-projects
+- name: JOB_NAME
+  displayName: Job Name
+  description: Name of the Scheduled Job to Create.
+  value: cronjob-prune-projects
+  required: true
+- name: SCHEDULE
+  displayName: Cron Schedule
+  description: Cron Schedule to Execute the Job
+  value: "@hourly"
+  required: true
+- name: SUCCESS_JOBS_HISTORY_LIMIT
+  displayName: Successful Job History Limit
+  description: The number of successful jobs that will be retained
+  value: '5'
+  required: true
+- name: FAILED_JOBS_HISTORY_LIMIT
+  displayName: Failed Job History Limit
+  description: The number of failed jobs that will be retained
+  value: '5'
+  required: true
+- name: NAMESPACE
+  displayName: "Namespace where this is deployed"
+  description: "Namespace where this is deployed."
+  value: "cluster-maintenance"
+  required: true
+- name: PROJECT_EXCLUDE_SYSTEM
+  displayName: System projects to exclude from the Prune Job
+  description: System projects that should not be deleted
+  value: default kube-public kube-service-catalog kube-system logging management-infra openshift openshift-ansible-service-broker openshift-infra openshift-node openshift-template-service-broker
+  required: true
+- name: PROJECT_EXCLUDE_USER
+  displayName: User defined projects to exclude from the Prune Job
+  description: User projects that should not be deleted
+  required: true
+- name: TIMESTAMP_HOURS_AGO
+  displayName: Prune projects older than X hours
+  description: The number of hours "old" the project needs to be - i.e. '-2hours'
+  value: '-12hours'
+  required: true
+- name: JOB_SERVICE_ACCOUNT
+  displayName: "Service Account Name"
+  description: "Name of the Service Account To Execute the Job As."
+  value: "pruner"
+  required: true
