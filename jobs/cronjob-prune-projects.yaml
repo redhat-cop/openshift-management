@@ -29,7 +29,7 @@ objects:
     runPolicy: Serial
     source:
       git:
-        uri: https://github.com/oybed/openshift-management.git
+        uri: https://github.com/redhat-cop/openshift-management.git
         ref: prune
       contextDir: /images/prune-ocp-projects
     strategy:
