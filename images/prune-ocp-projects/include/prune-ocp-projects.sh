@@ -6,6 +6,10 @@
 #PROJECT_EXCLUDE_SYSTEM
 #PROJECT_EXCLUDE_USER
 
+# Also make sure to declare the TIMESTAMP_HOURS_AGO environment variable with the 
+# number of hours "old" a project has to be for deletion - i.e.: '-2hours', '-24hours', etc
+#TIMESTAMP_HOURS_AGO='-12hours'
+
 # Use an indexed array to keep track of existing projects
 declare -A projects
 
@@ -36,7 +40,6 @@ fi
 # than the set number of hours
 for project in "${!projects[@]}";
 do
-  # need variable for time
   purgetime=`date -d "${TIMESTAMP_HOURS_AGO}" +%s`
   temp=`oc get project ${project} -o=custom-columns=time:.metadata.creationTimestamp --no-headers`
   projects[${project}]=`date -d "${temp}" +%s`
