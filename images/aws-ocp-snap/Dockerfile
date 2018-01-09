@@ -23,7 +23,7 @@ rpm -V $INSTALL_PKGS && \
 yum clean all && \
 pip install --upgrade pip && \
 pip install awscli && \
-curl https://mirror.openshift.com/pub/openshift-v3/clients/3.6.1/linux/oc.tar.gz | tar -C /usr/local/bin/ -xzf - && \
+curl https://mirror.openshift.com/pub/openshift-v3/clients/3.7.22/linux/oc.tar.gz | tar -C /usr/local/bin/ -xzf - && \
 chmod +x /usr/local/bin/create_snapshot.sh
 
 
