@@ -15,8 +15,8 @@ objects:
   spec:
     schedule: "${SCHEDULE}"
     concurrencyPolicy: Forbid
-    successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
-    failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
+    successfulJobsHistoryLimit: "${SUCCESS_JOBS_HISTORY_LIMIT}"
+    failedJobsHistoryLimit: "${FAILED_JOBS_HISTORY_LIMIT}"
     jobTemplate:
       spec:
         template:
