@@ -37,13 +37,12 @@ objects:
               scope: sub
               derefAliases: never
               pageSize: 0
-          userUIDAttribute: dn
           userNameAttributes: [ sAMAccountName ]
           tolerateMemberNotFoundErrors: true
           tolerateMemberOutOfScopeErrors: true
     whitelist.txt: |
-      CN=GC-AdminGroup,OU=OpenShift,OU=Grupos,DC=gcgestion,DC=com,DC=ar
-      CN=GC-DevGroup,OU=OpenShift,OU=Grupos,DC=gcgestion,DC=com,DC=ar
+      cn=AdminGroup,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com
+      cn=DevGroup,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com
 - kind: "CronJob"
   apiVersion: "batch/v2alpha1"
   metadata:
