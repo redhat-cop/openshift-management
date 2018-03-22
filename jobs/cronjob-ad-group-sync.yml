@@ -1,0 +1,186 @@
+---
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: "cronjob-ldap-group-sync"
+  annotations:
+    description: "Scheduled Task to Perform AD Group Synchronization"
+    iconClass: "icon-shadowman"
+    tags: "management,cronjob,ldap,group,sync"
+objects:
+- kind: ConfigMap
+  metadata:
+    name: ldap-config
+    labels:
+      template: "cronjob-ldap-group-sync"
+  apiVersion: v1
+  data:
+    ldap-sync.yml: |
+      kind: LDAPSyncConfig
+      apiVersion: v1
+      url: ${LDAP_URL}
+      insecure: true
+      bindDN: ${LDAP_BIND_DN}
+      bindPassword: ${LDAP_BIND_PASSWORD}
+      augmentedActiveDirectory:
+          groupsQuery:
+              baseDN: ${LDAP_GROUPS_SEARCH_BASE}
+              scope: sub
+              derefAliases: never
+              filter: ${LDAP_GROUPS_FILTER}
+              pageSize: 0
+          groupUIDAttribute: dn
+          groupNameAttributes: [ cn ]
+          groupMembershipAttributes: [ memberOf ]
+          usersQuery:
+              baseDN: ${LDAP_USERS_SEARCH_BASE}
+              scope: sub
+              derefAliases: never
+              pageSize: 0
+          userNameAttributes: [ sAMAccountName ]
+          tolerateMemberNotFoundErrors: true
+          tolerateMemberOutOfScopeErrors: true
+    whitelist.txt: |
+      cn=AdminGroup,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com
+      cn=DevGroup,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com
+- kind: "CronJob"
+  apiVersion: "batch/v2alpha1"
+  metadata:
+    name: "${JOB_NAME}"
+    labels:
+      template: "cronjob-ldap-group-sync"
+  spec:
+    schedule: "${SCHEDULE}"
+    concurrencyPolicy: "Forbid"
+    successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
+    failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            containers:
+              - name: "${JOB_NAME}"
+                image: "openshift3/jenkins-slave-base-rhel7"
+                command:
+                  - "/bin/bash"
+                  - "-c"
+                  - "oc adm groups sync --whitelist=/etc/config/whitelist.txt --sync-config=/etc/config/ldap-group-sync.yaml --confirm"
+                volumeMounts:
+                  - mountPath: "/etc/config"
+                    name: "ldap-sync-volume"
+            volumes:
+              - configMap:
+                  items:
+                    - key: ldap-sync.yml
+                      path: ldap-group-sync.yaml
+                    - key: whitelist.txt
+                      path: whitelist.txt
+                  name: ldap-config
+                name: ldap-sync-volume
+            restartPolicy: "Never"
+            terminationGracePeriodSeconds: 30
+            activeDeadlineSeconds: 500
+            dnsPolicy: "ClusterFirst"
+            serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
+            serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+- apiVersion: v1
+  kind: ClusterRole
+  metadata:
+    name: ldap-group-syncer
+    labels:
+      template: "cronjob-ldap-group-sync"
+  rules:
+    - apiGroups:
+        - ""
+      resources:
+        - groups
+      verbs:
+        - get
+        - list
+        - create
+        - update
+- apiVersion: v1
+  groupNames: null
+  kind: ClusterRoleBinding
+  metadata:
+    name: system:ldap-group-syncers
+    labels:
+      template: "cronjob-ldap-group-sync"
+  roleRef:
+    name: ldap-group-syncer
+  subjects:
+  - kind: ServiceAccount
+    name: ${JOB_SERVICE_ACCOUNT}
+  userNames:
+  - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: ${JOB_SERVICE_ACCOUNT}
+    labels:
+      template: "cronjob-ldap-group-sync"
+parameters:
+  - name: "NAMESPACE"
+    displayName: "Namespace"
+    description: "Name of the Namespace where to deploy the Scheduled Job"
+    value: "cluster-ops"
+    required: true
+  - name: "JOB_NAME"
+    displayName: "Job Name"
+    description: "Name of the Scheduled Job to Create."
+    value: "cronjob-ldap-group-sync"
+    required: true
+  - name: "SCHEDULE"
+    displayName: "Cron Schedule"
+    description: "Cron Schedule to Execute the Job"
+    value: "@hourly"
+    required: true
+  - name: "JOB_SERVICE_ACCOUNT"
+    displayName: "Service Account Name"
+    description: "Name of the Service Account To Exeucte the Job As."
+    value: "ldap-group-syncer"
+    required: true
+  - name: "KEEP_COMPLETE"
+    displayName: "Number of Completed Items"
+    description: "Number of completed items that will not be considered for pruning."
+    value: "5"
+    required: true
+  - name: "SUCCESS_JOBS_HISTORY_LIMIT"
+    displayName: "Successful Job History Limit"
+    description: "The number of successful jobs that will be retained"
+    value: "5"
+    required: true
+  - name: "FAILED_JOBS_HISTORY_LIMIT"
+    displayName: "Failed Job History Limit"
+    description: "The number of failed jobs that will be retained"
+    value: "5"
+    required: true
+  - name: "LDAP_URL"
+    displayName: "LDAP Server URL"
+    description: "URL of you LDAP server"
+    required: true
+  - name: "LDAP_BIND_DN"
+    displayName: "LDAP Bind User's DN"
+    description: "The Full DN for the user you wish to use to authenticate to LDAP"
+    required: true
+  - name: "LDAP_BIND_PASSWORD"
+    displayName: "LDAP Bind User's password"
+    description: "Password for the LDAP_BIND_DN user"
+    required: true
+  - name: "LDAP_GROUPS_SEARCH_BASE"
+    displayName: "Group search query"
+    description: "Location in LDAP tree where you will find groups"
+    required: true
+    value: "cn=groups,cn=accounts,dc=myorg,dc=example,dc=com"
+  - name: "LDAP_GROUPS_FILTER"
+    displayName: "Group Filter"
+    description: "LDAP Filter to use when deciding which groups to sync into OpenShift"
+    required: true
+    value: "(&(objectclass=organizationalPerson)(memberOf=cn=openshift-users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))"
+  - name: "LDAP_USERS_SEARCH_BASE"
+    displayName: "User search query"
+    description: "Location in LDAP tree where you will find users"
+    required: true
+    value: "cn=users,cn=accounts,dc=myorg,dc=example,dc=com"
+labels:
+  template: "cronjob-ldap-group-sync"
