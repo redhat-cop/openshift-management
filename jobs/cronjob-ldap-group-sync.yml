@@ -87,7 +87,7 @@ objects:
       template: "cronjob-ldap-group-sync"
   rules:
     - apiGroups:
-        - ""
+        - user.openshift.io
       resources:
         - groups
       verbs:
