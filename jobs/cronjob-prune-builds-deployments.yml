@@ -45,7 +45,7 @@ objects:
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
 - kind: ClusterRoleBinding
-  apiVersion: authorization.openshift.io/v1
+  apiVersion: v1
   metadata:
     name: system:build-pruners
     labels:
