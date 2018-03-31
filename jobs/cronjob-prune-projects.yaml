@@ -4,16 +4,16 @@ kind: Template
 metadata:
   name: cronjob-prune-projects
 objects:
-- apiVersion: v1
-  kind: ImageStream
+- kind: ImageStream
+  apiVersion: v1
   metadata:
     annotations:
       description: Keeps track of changes in the application image
     name: ${NAME}
     labels:
       template: cronjob-prune-projects
-- apiVersion: v1
-  kind: BuildConfig
+- kind: BuildConfig
+  apiVersion: v1
   metadata:
     annotations:
       description: Defines how to build the application
@@ -39,8 +39,8 @@ objects:
       type: Docker
     triggers:
     - type: ConfigChange
-- apiVersion: batch/v2alpha1
-  kind: CronJob
+- kind: CronJob
+  apiVersion: batch/v1beta1
   metadata:
     name: "${JOB_NAME}"
     labels:
@@ -74,8 +74,8 @@ objects:
             dnsPolicy: ClusterFirst
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
-- apiVersion: v1
-  kind: ClusterRoleBinding
+- kind: ClusterRoleBinding
+  apiVersion: v1
   metadata:
     name: system:project-pruners
     labels:
@@ -87,8 +87,8 @@ objects:
     name: ${JOB_SERVICE_ACCOUNT}
   userNames:
   - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
-- apiVersion: v1
-  kind: ServiceAccount
+- kind: ServiceAccount
+  apiVersion: v1
   metadata:
     name: ${JOB_SERVICE_ACCOUNT}
     labels:

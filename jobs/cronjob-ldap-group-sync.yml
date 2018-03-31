@@ -9,11 +9,11 @@ metadata:
     tags: "management,cronjob,ldap,group,sync"
 objects:
 - kind: ConfigMap
+  apiVersion: v1
   metadata:
     name: ldap-config
     labels:
       template: "cronjob-ldap-group-sync"
-  apiVersion: v1
   data:
     ldap-sync.yml: |
       kind: LDAPSyncConfig
@@ -42,7 +42,7 @@ objects:
           tolerateMemberNotFoundErrors: true
           tolerateMemberOutOfScopeErrors: true
 - kind: "CronJob"
-  apiVersion: "batch/v2alpha1"
+  apiVersion: "batch/v1beta1"
   metadata:
     name: "${JOB_NAME}"
     labels:
@@ -79,15 +79,15 @@ objects:
             dnsPolicy: "ClusterFirst"
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
-- apiVersion: v1
-  kind: ClusterRole
+- kind: ClusterRole
+  apiVersion: v1
   metadata:
     name: ldap-group-syncer
     labels:
       template: "cronjob-ldap-group-sync"
   rules:
     - apiGroups:
-        - ""
+        - user.openshift.io
       resources:
         - groups
       verbs:
@@ -95,9 +95,9 @@ objects:
         - list
         - create
         - update
-- apiVersion: v1
+- kind: ClusterRoleBinding
+  apiVersion: v1
   groupNames: null
-  kind: ClusterRoleBinding
   metadata:
     name: system:ldap-group-syncers
     labels:
@@ -109,7 +109,8 @@ objects:
     name: ${JOB_SERVICE_ACCOUNT}
   userNames:
   - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
-- apiVersion: v1
+- kind: ServiceAccount
+  apiVersion: v1
   kind: ServiceAccount
   metadata:
     name: ${JOB_SERVICE_ACCOUNT}
