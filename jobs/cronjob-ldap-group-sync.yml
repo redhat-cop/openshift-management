@@ -137,11 +137,6 @@ parameters:
     description: "Name of the Service Account To Exeucte the Job As."
     value: "ldap-group-syncer"
     required: true
-  - name: "KEEP_COMPLETE"
-    displayName: "Number of Completed Items"
-    description: "Number of completed items that will not be considered for pruning."
-    value: "5"
-    required: true
   - name: "SUCCESS_JOBS_HISTORY_LIMIT"
     displayName: "Successful Job History Limit"
     description: "The number of successful jobs that will be retained"
