@@ -62,7 +62,7 @@ objects:
                 command:
                   - "/bin/bash"
                   - "-c"
-                  - "oc adm groups sync --sync-config=/etc/config/ldap-group-sync.yaml --confirm"
+                  - "oc adm groups sync --sync-config=/etc/config/ldap-group-sync.yaml --confirm || :"
                 volumeMounts:
                   - mountPath: "/etc/config"
                     name: "ldap-sync-volume"
