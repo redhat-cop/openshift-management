@@ -6,7 +6,7 @@ The rest of this document describes the specific configurations that are applica
 
 ### Git Backup
 
-The [cronjob-git-sync.json](cronjob-git-sync.json) backs up one repository to another repository with all of it's branches on a regular basis.
+The [cronjob-git-sync.yml](cronjob-git-sync.yml) backs up one repository to another repository with all of it's branches on a regular basis.
 
 Prior to instantiating the template, the following must be completed:
 
