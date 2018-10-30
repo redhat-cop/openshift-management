@@ -112,7 +112,6 @@ objects:
   - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
 - kind: ServiceAccount
   apiVersion: v1
-  kind: ServiceAccount
   metadata:
     name: ${JOB_SERVICE_ACCOUNT}
     labels:
