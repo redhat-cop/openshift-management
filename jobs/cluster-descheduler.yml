@@ -1,0 +1,163 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: cluster-descheduler
+  annotations:
+    description: "Descheduler to remove pods violating usage thresholds, affinity violations and dupliacate pod placements"
+    iconClass: icon-shadowman
+    tags: management,descheduler
+objects:
+- kind: ClusterRole
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: descheduler-role
+    labels:
+      template: cluster-scheduler
+  rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "watch", "list"] 
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "watch", "list", "delete"] 
+  - apiGroups: [""]
+    resources: ["pods/eviction"] 
+    verbs: ["create"]
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: descheduler-sa
+    namespace: "${NAMESPACE}"
+    labels:
+      template: cluster-descheduler
+- kind: ClusterRoleBinding
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  metadata:
+    name: descheduler-binding
+    labels:
+      template: cluster-descheduler
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: descheduler-role
+  subjects:
+  - kind: ServiceAccount
+    name: descheduler-sa
+    namespace: "${NAMESPACE}"
+- kind: ConfigMap
+  apiVersion: v1
+  data:
+    policy.yaml: |
+      apiVersion: descheduler/v1alpha1
+      kind: DeschedulerPolicy
+      strategies:
+        RemoveDuplicates:
+          enabled: ${REMOVE_DUPS} 
+        LowNodeUtilization:
+          enabled: ${ENABLE_UTILIZATION} 
+          params:
+            nodeResourceUtilizationThresholds:
+              thresholds:
+                cpu: ${MIN_CPU}
+                memory: ${MIN_MEM}
+                pods: ${MIN_PODS}
+              targetThresholds:
+                cpu: ${MAX_CPU}
+                memory: ${MAX_MEM}
+                pods: ${MAX_PODS}
+              numberOfNodes: ${NODE_THRESHOLD} 
+        RemovePodsViolatingInterPodAntiAffinity:
+          enabled: ${ENABLE_AFFINITY_VIOLATION}
+  metadata:
+    name: descheduler-policy-configmap
+    namespace: "${NAMESPACE}"
+    labels:
+      template: cluster-descheduler
+- kind: CronJob
+  apiVersion: batch/v1beta1
+  metadata:
+    name: descheduler-job
+    namespace: "${NAMESPACE}"
+    labels:
+      template: cluster-descheduler
+  spec:
+    schedule: "${SCHEDULE}"
+    concurrencyPolicy: "Forbid"
+    successfulJobsHistoryLimit: "1"
+    failedJobsHistoryLimit: "1"
+    jobTemplate:
+      spec:
+        completions: 1
+        parallelism: 1
+        template:
+          metadata:
+            name: descheduler-pod
+            annotations:
+              scheduler.alpha.kubernetes.io/critical-pod: "true"
+          spec:
+            containers:
+            - name: descheduler
+              image: openshift3/ose-descheduler
+              volumeMounts:
+              - mountPath: /policy-dir
+                name: policy-volume
+              command:
+              - "/bin/sh"
+              - "-ec"
+              - |
+                /bin/descheduler --policy-config-file /policy-dir/policy.yaml
+            restartPolicy: Never
+            serviceAccountName: descheduler-sa
+            volumes:
+            - name: policy-volume
+              configMap:
+                name: descheduler-policy-configmap
+parameters:
+- name: "SCHEDULE"
+  displayName: "Cron Schedule"
+  description: "Cron Schedule to Execute the Job"
+  value: "@hourly"
+- name: NAMESPACE
+  displayName: Namespace
+  description: namespace to deploy descheduler
+  value: "kube-system"
+- name: MIN_CPU
+  displayName:
+  description:
+  value: "0"
+- name: MIN_MEM
+  displayName:
+  description:
+  value: "0"
+- name: MAX_CPU
+  displayName:
+  description:
+  value: "0"
+- name: MAX_MEM
+  displayName:
+  description:
+  value: "0"
+- name: MIN_PODS
+  displayName:
+  description:
+  value: "0"
+- name: MAX_PODS
+  displayName:
+  description:
+  value: "0"
+- name: ENABLE_AFFINITY_VIOLATION
+  displayName:
+  description: enable descheduling of pods that are violating pod affinities
+  value: "False"
+- name: ENABLE_UTILIZATION
+  displayName:
+  description: enable descheduling of pods that are violating utilization specs
+  value: "False"
+- name: REMOVE_DUPS
+  displayName:
+  description: enable descheduling of application pods that are scheduled on the same node
+  value: "False"
+- name: NODE_THRESHOLD
+  displayName:
+  description:
+  value: "0"
