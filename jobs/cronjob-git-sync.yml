@@ -36,7 +36,7 @@ objects:
                 secretName: "${SSH_KEY_SECRET_NAME}"
             containers:
               - name: "${JOB_NAME}"
-                image: "openshift3/python-33-rhel7"
+                image: "${IMAGE}:${IMAGE_TAG}"
                 env:
                 - name: GIT_COMMITTER_NAME
                   value: hello
@@ -126,5 +126,15 @@ parameters:
     description: "Name of the ssh key secret"
     required: true
     value: "ssh-key-secret"
+  - name: "IMAGE"
+    displayName: "Image"
+    description: "Image to use for the container."
+    required: true
+    value: "registry.access.redhat.com/openshift3/python-33-rhel7"
+  - name: "IMAGE_TAG"
+    displayName: "Image Tag"
+    description: "Image Tag to use for the container."
+    required: true
+    value: "latest"
 labels:
   template: "cronjob-git-sync"

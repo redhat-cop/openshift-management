@@ -23,7 +23,7 @@ objects:
           spec:
             containers:
             - name: "${JOB_NAME}"
-              image: openshift3/jenkins-slave-base-rhel7
+              image: "${IMAGE}:${IMAGE_TAG}"
               command:
               - "/bin/bash"
               - "-c"
@@ -102,5 +102,16 @@ parameters:
   description: "Namespace where this is deployed."
   value: "cluster-ops"
   required: true
+- name: "IMAGE"
+  displayName: "Image"
+  description: "Image to use for the container."
+  required: true
+  value: "registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7"
+- name: "IMAGE_TAG"
+  displayName: "Image Tag"
+  description: "Image Tag to use for the container."
+  required: true
+  value: "v3.11"
+
 labels:
   template: cronjob-prune-images

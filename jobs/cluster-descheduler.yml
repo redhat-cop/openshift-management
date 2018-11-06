@@ -97,7 +97,7 @@ objects:
           spec:
             containers:
             - name: descheduler
-              image: openshift3/ose-descheduler
+              image: "${IMAGE}:${IMAGE_TAG}"
               volumeMounts:
               - mountPath: /policy-dir
                 name: policy-volume
@@ -161,3 +161,13 @@ parameters:
   displayName:
   description:
   value: "0"
+- name: "IMAGE"
+  displayName: "Image"
+  description: "Image to use for the container."
+  required: true
+  value: "registry.access.redhat.com/openshift3/ose-descheduler"
+- name: "IMAGE_TAG"
+  displayName: "Image Tag"
+  description: "Image Tag to use for the container."
+  required: true
+  value: "v3.11"
