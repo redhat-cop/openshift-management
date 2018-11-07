@@ -131,7 +131,7 @@ parameters:
 - name: PROJECT_EXCLUDE_SYSTEM
   displayName: System projects to exclude from the Prune Job
   description: System projects that should not be deleted
-  value: default kube-public kube-service-catalog kube-system management-infra openshift openshift-ansible-service-broker openshift-infra openshift-logging openshift-node openshift-sdn openshift-template-service-broker openshift-web-console
+  value: default kube-public kube-service-catalog kube-system management-infra openshift openshift-ansible-service-broker openshift-infra openshift-logging openshift-node openshift-sdn openshift-template-service-broker openshift-web-console openshift-console openshift-metrics-server openshift-monitoring
   required: true
 - name: PROJECT_EXCLUDE_USER
   displayName: User defined projects to exclude from the Prune Job
