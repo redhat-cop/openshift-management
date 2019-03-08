@@ -149,3 +149,22 @@ To instantiate the template, run the following.
 		-p VOL="Persistent Volume Claim name (can be ALL)" \
 		| oc create -f-
 	```
+
+### Truncate Cassandra Indexes
+
+Job to clean the `metrics_tags_idx` table from time to time to avoid metrics slowlyness. For more detailed info, please refer to [Bugzilla 1569096](https://bugzilla.redhat.com/show_bug.cgi?id=1569096).
+
+This job is pretty similar to the prune ones:
+
+1. Create a project in which to host your job.
+	```
+	oc new-project <project>
+	```
+
+2. Instantiate the template
+```
+oc process -f <template_file> \
+-p NAMESPACE="<project name from previous step>" -p METRICS_NAMESPACE="<project name where metrics are deployed*>"  | oc create -f-
+```
+
+**The project where metrics are deployed normally is openshift-infra*.

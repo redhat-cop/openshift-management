@@ -1,0 +1,168 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: cronjob-truncate-cassandra-tag-metrics
+  annotations:
+    description: Scheduled Task to Truncate Cassandra Tags Index
+    iconClass: icon-shadowman
+    tags: management,cronjob,truncate,cassandra
+objects:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: ${NAME}
+    labels:
+      template: cronjob-truncate-cassandra-tag-metrics
+  spec:
+    lookupPolicy:
+      local: true
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: ${NAME}
+    labels:
+      template: cronjob-truncate-cassandra-tag-metrics
+  spec:
+    completionDeadlineSeconds: "1800"
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}:${TAG}
+    runPolicy: Serial
+    source:
+      git:
+        uri: "${SOURCE_REPOSITORY_URL}"
+        ref: "${SOURCE_REPOSITORY_REF}"
+      contextDir: "${CONTEXT_DIR}"
+    strategy:
+      dockerStrategy:
+        from:
+          kind: DockerImage
+          name: "${BASE_IMAGE}"
+      type: Docker
+    triggers:
+    - type: ConfigChange
+- kind: CronJob
+  apiVersion: batch/v1beta1
+  metadata:
+    name: "${JOB_NAME}"
+    labels:
+      template: cronjob-truncate-cassandra-tag-metrics
+  spec:
+    schedule: "${SCHEDULE}"
+    concurrencyPolicy: Forbid
+    successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
+    failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            containers:
+            - name: "${JOB_NAME}"
+              image: "${NAME}:${TAG}"
+              command: 
+              - "/bin/bash"
+              - "-c"
+              - "/usr/local/bin/truncate-cassandra-tag-metrics.sh"
+              env:
+              - name: METRICS_NAMESPACE
+                value: "${METRICS_NAMESPACE}"
+              - name: CASSANDRA_CONTAINER_PREFIX
+                value: "${CASSANDRA_CONTAINER_PREFIX}"
+            restartPolicy: Never
+            terminationGracePeriodSeconds: 30
+            activeDeadlineSeconds: 500
+            dnsPolicy: ClusterFirst
+            serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
+            serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  metadata:
+    name: system:cassandra-cleaner
+    labels:
+      template: "cronjob-truncate-cassandra-tag-metrics"
+  roleRef:
+    name: cluster-admin
+  subjects:
+  - kind: ServiceAccount
+    name: ${JOB_SERVICE_ACCOUNT}
+  userNames:
+  - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ${JOB_SERVICE_ACCOUNT}
+    labels:
+      template: "cronjob-truncate-cassandra-tag-metrics"
+parameters:
+- description: The name assigned to all of the frontend objects defined in this template.
+  displayName: Name
+  name: NAME
+  required: true
+  value: truncate-cassandra-tag-metrics
+- name: JOB_NAME
+  displayName: Job Name
+  description: Name of the Scheduled Job to Create.
+  value: cronjob-truncate-cassandra-tag-metrics
+  required: true
+- name: SCHEDULE
+  displayName: Cron Schedule
+  description: Cron Schedule to Execute the Job
+  value: 0 0 * * *
+  required: true
+- name: JOB_SERVICE_ACCOUNT
+  displayName: Service Account Name
+  description: Name of the Service Account To Exeucte the Job As.
+  value: pruner
+  required: true
+- name: SUCCESS_JOBS_HISTORY_LIMIT
+  displayName: Successful Job History Limit
+  description: The number of successful jobs that will be retained
+  value: '5'
+  required: true
+- name: FAILED_JOBS_HISTORY_LIMIT
+  displayName: Failed Job History Limit
+  description: The number of failed jobs that will be retained
+  value: '5'
+  required: true
+- name: "NAMESPACE"
+  displayName: "Namespace where this is deployed"
+  description: "Namespace where this is deployed."
+  value: "cluster-ops"
+  required: true
+- name: "METRICS_NAMESPACE"
+  displayName: "Namespace where metrics is deployed"
+  description: "Namespace where metrics is deployed."
+  value: "openshift-infra"
+  required: true
+- name: "CASSANDRA_CONTAINER_PREFIX"
+  displayName: "Prefix of the cassandra pod"
+  description: "Prefix of the cassandra pod."
+  value: "hawkular-cassandra"
+  required: true
+- description: Git branch/tag reference
+  name: SOURCE_REPOSITORY_REF
+  value: master
+- description: Git source URL for application
+  name: SOURCE_REPOSITORY_URL
+  required: true
+  value: https://github.com/redhat-cop/openshift-management
+- description: Path within Git repository to build; empty for root of repository
+  name: CONTEXT_DIR
+  value: "images/truncate-cassandra"
+- description: Base image for the buils
+  name: BASE_IMAGE
+  required: true
+  value: "centos:7"
+- description: The tag for the iamge
+  displayName: Image Tag
+  name: TAG
+  required: true
+  value: latest
+labels:
+  template: cronjob-truncate-cassandra-tag-metrics
