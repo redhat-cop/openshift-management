@@ -32,7 +32,7 @@ objects:
     output:
       to:
         kind: ImageStreamTag
-        name: ${NAME}:${TAG}
+        name: ${NAME}:latest
     runPolicy: Serial
     source:
       git:
@@ -43,7 +43,10 @@ objects:
       dockerStrategy:
         from:
           kind: DockerImage
-          name: "${BASE_IMAGE}"
+          name: "${BASE_IMAGE}:${TAG}"
+        buildArgs:
+          - name: OC_CLIENT_DOWNLOAD_URL
+            value: ${OC_CLIENT_DOWNLOAD_URL}
       type: Docker
     triggers:
     - type: ConfigChange
@@ -64,7 +67,7 @@ objects:
           spec:
             containers:
             - name: "${JOB_NAME}"
-              image: "${NAME}:${TAG}"
+              image: "${NAME}:latest"
               command: 
               - "/bin/bash"
               - "-c"
@@ -80,14 +83,35 @@ objects:
             dnsPolicy: ClusterFirst
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
-- kind: ClusterRoleBinding
+- kind: ClusterRole
   apiVersion: v1
   metadata:
-    name: system:cassandra-cleaner
+    name: cassandra-cleaner
+    labels:
+      template: "cronjob-truncate-cassandra-tag-metrics"
+  rules:
+    - apiGroups:
+        - ""
+        - user.openshift.io
+      resources:
+        - deploymentconfigs.apps.openshift.io/scale
+        - pods/exec
+        - replicationcontrollers/scale
+        - replicationcontrollers.extensions/scale
+      verbs:
+        - get
+        - list
+        - create
+        - update
+- kind: ClusterRoleBinding
+  apiVersion: v1
+  groupNames: null
+  metadata:
+    name: cassandra-cleaners
     labels:
       template: "cronjob-truncate-cassandra-tag-metrics"
   roleRef:
-    name: cluster-admin
+    name: cassandra-cleaner
   subjects:
   - kind: ServiceAccount
     name: ${JOB_SERVICE_ACCOUNT}
@@ -155,14 +179,19 @@ parameters:
 - description: Path within Git repository to build; empty for root of repository
   name: CONTEXT_DIR
   value: "images/truncate-cassandra"
-- description: Base image for the buils
+- description: Base image for the builds
   name: BASE_IMAGE
   required: true
-  value: "centos:7"
+  value: "rhel7-minimal"
 - description: The tag for the iamge
   displayName: Image Tag
   name: TAG
   required: true
   value: latest
+- name: OC_CLIENT_DOWNLOAD_URL
+  displayName: oc client download URL
+  description: oc client binary download URL
+  value: https://mirror.openshift.com/pub/openshift-v3/clients/3.9.19/linux/oc.tar.gz
+  required: true
 labels:
   template: cronjob-truncate-cassandra-tag-metrics
