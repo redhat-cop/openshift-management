@@ -1,4 +1,4 @@
-FROM rhel7-minimal:latest
+FROM rhel7:latest
 
 MAINTAINER Ricardo Zanini <ricardozanini@gmail.com>
 

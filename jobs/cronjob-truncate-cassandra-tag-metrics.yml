@@ -8,6 +8,47 @@ metadata:
     iconClass: icon-shadowman
     tags: management,cronjob,truncate,cassandra
 objects:
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: ${JOB_SERVICE_ACCOUNT}
+    labels:
+      template: "cronjob-truncate-cassandra-tag-metrics"
+- kind: ClusterRole
+  apiVersion: v1
+  metadata:
+    name: cassandra-cleaner
+    labels:
+      template: "cronjob-truncate-cassandra-tag-metrics"
+  rules:
+  - apiGroups:
+    - ""
+    attributeRestrictions: null
+    resources:  
+    - pods
+    - pods/exec
+    - replicationcontrollers
+    - replicationcontrollers/scale
+    verbs:
+    - get
+    - list
+    - create
+    - update
+- apiVersion: authorization.openshift.io/v1
+  groupNames: null
+  kind: ClusterRoleBinding
+  metadata:
+    name: cassandra-cleaners
+    labels:
+      template: "cronjob-truncate-cassandra-tag-metrics"
+  roleRef:
+    name: cassandra-cleaner
+    namespace: ${NAMESPACE}
+  subjects:
+  - kind: SystemUser
+    name: system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
+  userNames:
+  - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
 - kind: ImageStream
   apiVersion: v1
   metadata:
@@ -83,46 +124,6 @@ objects:
             dnsPolicy: ClusterFirst
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
-- kind: ClusterRole
-  apiVersion: v1
-  metadata:
-    name: cassandra-cleaner
-    labels:
-      template: "cronjob-truncate-cassandra-tag-metrics"
-  rules:
-    - apiGroups:
-        - ""
-        - user.openshift.io
-      resources:
-        - deploymentconfigs.apps.openshift.io/scale
-        - pods/exec
-        - replicationcontrollers/scale
-        - replicationcontrollers.extensions/scale
-      verbs:
-        - get
-        - list
-        - create
-        - update
-- kind: ClusterRoleBinding
-  apiVersion: v1
-  groupNames: null
-  metadata:
-    name: cassandra-cleaners
-    labels:
-      template: "cronjob-truncate-cassandra-tag-metrics"
-  roleRef:
-    name: cassandra-cleaner
-  subjects:
-  - kind: ServiceAccount
-    name: ${JOB_SERVICE_ACCOUNT}
-  userNames:
-  - system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
-- kind: ServiceAccount
-  apiVersion: v1
-  metadata:
-    name: ${JOB_SERVICE_ACCOUNT}
-    labels:
-      template: "cronjob-truncate-cassandra-tag-metrics"
 parameters:
 - description: The name assigned to all of the frontend objects defined in this template.
   displayName: Name
@@ -182,7 +183,7 @@ parameters:
 - description: Base image for the builds
   name: BASE_IMAGE
   required: true
-  value: "rhel7-minimal"
+  value: "rhel7"
 - description: The tag for the iamge
   displayName: Image Tag
   name: TAG
