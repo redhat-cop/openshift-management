@@ -43,7 +43,6 @@ objects:
       template: "cronjob-truncate-cassandra-tag-metrics"
   roleRef:
     name: cassandra-cleaner
-    namespace: ${NAMESPACE}
   subjects:
   - kind: SystemUser
     name: system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}
