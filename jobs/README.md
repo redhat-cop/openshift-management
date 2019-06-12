@@ -60,9 +60,9 @@ oc process -f <template_file> \
 
 ### LDAP Group Synchronization
 
-The [cronjob-ldap-group-sync.yml](cronjob-ldap-group-sync.yml) facilitates routine [LDAP Group Synchronization](https://docs.openshift.com/container-platform/latest/install_config/syncing_groups_with_ldap.html) synchronize groups defined in an LDAP store with OpenShift's internal group storage facility.
+The [cronjob-ldap-group-sync.yml](cronjob-ldap-group-sync.yml) and [cronjob-ldap-group-sync-secure.yml](cronjob-ldap-group-sync-secure.yml) templates facilitate routine [LDAP Group Synchronization](https://docs.openshift.com/container-platform/latest/install_config/syncing_groups_with_ldap.html), synchronizing groups defined in an LDAP directory with OpenShift's internal group storage facility.
 
-This template makes several assumptions about your LDAP architecture and intentions of your group sync process, and is meant to showcase a common use case seen in the field. It will likely need further updating to accommodate other sync strategies or LDAP architectures.
+These template makes several assumptions about your LDAP architecture and intentions of your group sync process, and is meant to showcase common use cases seen in the field. It will likely need further updating to accommodate other sync strategies or LDAP architectures.
 
 In this case, we use a top level group to designate all users and groups that will have access to OpenShift. We then create child groups to designate users who should have certain capabilities in OpenShift. A sample tree structure might look like:
 
@@ -82,12 +82,13 @@ We'll build a filter to return these groups in LDAP. Something like:
 
 #### Setup
 
-The `cronjob-ldap-group-sync` template creates several objects in OpenShift.
+The `cronjob-ldap-group-sync.yml` template creates several objects in OpenShift.
 
 * A custom `ClusterRole` that defines the proper permissions to do a group sync
 * A `ServiceAccount` we will use to run the group sync
 * A `ClusterRoleBinding` that maps the `ServiceAccount` to the `ClusterRole`
-* A `ConfigMap` containing the `LDAPSyncConfig` [configuration file](https://docs.openshift.com/container-platform/latest/install_config/syncing_groups_with_ldap.html#configuring-ldap-sync).
+* A `ConfigMap` containing the `LDAPSyncConfig` [configuration file](https://docs.openshift.com/container-platform/latest/install_config/syncing_groups_with_ldap.html#configuring-ldap-sync) and optional whitelist configuration.
+* A `Secret` containing the LDAP bind password
 * A `CronJob` to run the LDAP Sync on a schedule
 
 To instantiate the template, run the following.
@@ -102,11 +103,30 @@ To instantiate the template, run the following.
 	  -p NAMESPACE="<project name from previous step>"
 	  -p LDAP_URL="ldap://idm-2.etl.rht-labs.com:389" \
 	  -p LDAP_BIND_DN="uid=ldap-user,cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
-		-p LDAP_BIND_PASSWORD="password1" \
-		-p LDAP_GROUPS_SEARCH_BASE="cn=groups,cn=accounts,dc=myorg,dc=example,dc=com" \
-		-p LDAP_GROUPS_FILTER="(&(objectclass=ipausergroup)(memberOf=cn=ose_users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))" \
-		-p LDAP_USERS_SEARCH_BASE="cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
-		| oc create -f-
+	  -p LDAP_BIND_PASSWORD="password1" \
+	  -p LDAP_GROUPS_SEARCH_BASE="cn=groups,cn=accounts,dc=myorg,dc=example,dc=com" \
+	  -p LDAP_GROUPS_FILTER="(&(objectclass=ipausergroup)(memberOf=cn=ose_users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))" \
+	  -p LDAP_USERS_SEARCH_BASE="cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
+	| oc create -f-
+	```
+
+The `cronjob-ldap-group-sync-secure.yml` template uses TLS security and creates the additional object in OpenShift:
+
+* A `ConfigMap` containing the TLS certificate bundle for validating the LDAP server identity
+
+To instatiate the secure ldap group sync template template add the `LDAP_CA_CERT` parameter:
+
+	```
+	oc process -f jobs/cronjob-ldap-group-sync.yml \
+	  -p NAMESPACE="<project name from previous step>"
+	  -p LDAP_URL="ldap://idm-2.etl.rht-labs.com:389" \
+	  -p LDAP_BIND_DN="uid=ldap-user,cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
+	  -p LDAP_BIND_PASSWORD="password1" \
+	  -p LDAP_CA_CERT="$(cat /path/to/ldap-ca.crt)" \
+	  -p LDAP_GROUPS_SEARCH_BASE="cn=groups,cn=accounts,dc=myorg,dc=example,dc=com" \
+	  -p LDAP_GROUPS_FILTER="(&(objectclass=ipausergroup)(memberOf=cn=ose_users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))" \
+	  -p LDAP_USERS_SEARCH_BASE="cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
+	| oc create -f-
 	```
 
 #### Cleanup
@@ -114,7 +134,7 @@ To instantiate the template, run the following.
 You can clean up the objects created by the template with the following command.
 
 ```
-oc delete cronjob,configmap,clusterrole,clusterrolebinding,sa -l template=cronjob-ldap-group-sync
+oc delete cronjob,configmap,clusterrole,clusterrolebinding,sa,secret -l template=cronjob-ldap-group-sync
 ```
 
 ### AWS EBS backed PVs snapshots

@@ -1,0 +1,278 @@
+---
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: "cronjob-ldap-group-sync-secure"
+  annotations:
+    description: "Scheduled Task to Perform LDAP Group Synchronization"
+    iconClass: "icon-shadowman"
+    tags: "management,cronjob,ldap,group,sync"
+labels:
+  template: "cronjob-ldap-group-sync-secure"
+
+parameters:
+- name: "NAMESPACE"
+  displayName: "Namespace"
+  description: "Name of the Namespace where to deploy the Scheduled Job"
+  value: "openshift-cluster-ops"
+  required: true
+- name: "JOB_NAME"
+  displayName: "Job Name"
+  description: "Name of the Scheduled Job to Create."
+  value: "cronjob-ldap-group-sync"
+  required: true
+- name: "SCHEDULE"
+  displayName: "Cron Schedule"
+  description: "Cron Schedule to Execute the Job"
+  value: "@hourly"
+  required: true
+- name: "JOB_SERVICE_ACCOUNT"
+  displayName: "Service Account Name"
+  description: "Name of the Service Account To Exeucte the Job As."
+  value: "ldap-group-syncer"
+  required: true
+- name: "SUCCESS_JOBS_HISTORY_LIMIT"
+  displayName: "Successful Job History Limit"
+  description: "The number of successful jobs that will be retained"
+  value: "5"
+  required: true
+- name: "FAILED_JOBS_HISTORY_LIMIT"
+  displayName: "Failed Job History Limit"
+  description: "The number of failed jobs that will be retained"
+  value: "5"
+  required: true
+- name: "LDAP_URL"
+  displayName: "LDAP Server URL"
+  description: "URL of you LDAP server"
+  required: true
+- name: "LDAP_BIND_DN"
+  displayName: "LDAP Bind User's DN"
+  description: "The Full DN for the user you wish to use to authenticate to LDAP"
+  required: true
+- name: "LDAP_BIND_PASSWORD"
+  displayName: "LDAP Bind User's password"
+  description: "Password for the LDAP_BIND_DN user"
+  required: true
+- name: "LDAP_BIND_PASSWORD_SECRET"
+  displayName: "LDAP Bind Password Secret"
+  description: "The name for the secret in which to store the bind password"
+  value: "ldap-bind-password"
+  required: true
+- name: "LDAP_CA_CERT"
+  displayName: "LDAP CA Certificate"
+  description: "The LDAP TLS Certificate Authority Certificate Bundle"
+  required: true
+- name: "LDAP_GROUPS_SEARCH_BASE"
+  displayName: "Group search query"
+  description: "Location in LDAP tree where you will find groups"
+  required: true
+  value: "cn=groups,cn=accounts,dc=myorg,dc=example,dc=com"
+- name: "LDAP_GROUPS_FILTER"
+  displayName: "Group Filter"
+  description: "LDAP Filter to use when deciding which groups to sync into OpenShift"
+  required: true
+  value: "(&(objectclass=ipausergroup)(memberOf=cn=openshift-users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))"
+- name: "LDAP_GROUP_NAME_ATTRIBUTES"
+  displayName: "Group name attributes"
+  description: "The attribute list to use to discover the name for the group."
+  required: true
+  value: >-
+    ["cn"]
+- name: "LDAP_GROUP_MEMBERSHIP_ATTRIBUTES"
+  displayName: "Group membership attributes"
+  required: true
+  value: >-
+    ["member"]
+- name: "LDAP_GROUP_UID_ATTRIBUTE"
+  displayName: "Group UID Attribute"
+  description: "The attribute that uniquely identifies a group on the LDAP server."
+  required: true
+  value: "ipaUniqueID"
+- name: "LDAP_GROUPS_WHITELIST"
+  displayName: "LDAP sync whitelist"
+  description: "File content for groups sync --whitelist option"
+  value: ""
+- name: "LDAP_SYNC_CONFIGMAP"
+  displayName: "LDAP sync config map"
+  description: "Name for the config map storing the group sync config"
+  value: "ldap-group-sync"
+- name: "LDAP_SYNC_CA_CONFIGMAP"
+  displayName: "LDAP sync certificate authority config map"
+  description: "Name for the config map storing the TLS certificate authority"
+  value: "ldap-group-sync-ca"
+- name: "LDAP_USER_NAME_ATTRIBUTES"
+  displayName: "User name attributes"
+  description: "JSON list of attributes to use to discover the user name for group membership"
+  required: true
+  value: >-
+    ["uid"]
+- name: "LDAP_USER_UID_ATTRIBUTE"
+  displayName: "User UID attribute"
+  description: "The attribute that uniquely identifies a user on the LDAP server."
+  required: true
+  value: "dn"
+- name: "LDAP_USERS_SEARCH_BASE"
+  displayName: "User search query"
+  description: "Location in LDAP tree where you will find users"
+  required: true
+  value: "cn=users,cn=accounts,dc=myorg,dc=example,dc=com"
+- name: "IMAGE"
+  displayName: "Image"
+  description: "Image to use for the container."
+  required: true
+  value: "registry.access.redhat.com/openshift3/ose-cli"
+- name: "IMAGE_TAG"
+  displayName: "Image Tag"
+  description: "Image Tag to use for the container."
+  required: true
+  value: "v3.11"
+
+objects:
+- kind: "ConfigMap"
+  apiVersion: "v1"
+  metadata:
+    name: "${LDAP_SYNC_CONFIGMAP}"
+    namespace: "${NAMESPACE}"
+    labels:
+      template: "cronjob-ldap-group-sync"
+  data:
+    ldap-group-sync.yaml: |
+      kind: "LDAPSyncConfig"
+      apiVersion: "v1"
+      url: "${LDAP_URL}"
+      insecure: false
+      bindDN: "${LDAP_BIND_DN}"
+      bindPassword:
+        file: "/ldap-sync/secrets/bind_password"
+      ca: "/ldap-sync/ca/ldap-ca.crt"
+      rfc2307:
+        groupsQuery:
+          baseDN: "${LDAP_GROUPS_SEARCH_BASE}"
+          scope: "sub"
+          derefAliases: "never"
+          filter: "${LDAP_GROUPS_FILTER}"
+          pageSize: 0
+        groupUIDAttribute: "${LDAP_GROUP_UID_ATTRIBUTE}"
+        groupNameAttributes: ${LDAP_GROUP_NAME_ATTRIBUTES}
+        groupMembershipAttributes: ${LDAP_GROUP_MEMBERSHIP_ATTRIBUTES}
+        usersQuery:
+          baseDN: "${LDAP_USERS_SEARCH_BASE}"
+          scope: "sub"
+          derefAliases: "never"
+          pageSize: 0
+        userNameAttributes: ${LDAP_USER_NAME_ATTRIBUTES}
+        userUIDAttribute: "${LDAP_USER_UID_ATTRIBUTE}"
+        tolerateMemberNotFoundErrors: true
+        tolerateMemberOutOfScopeErrors: true
+    whitelist.txt: "${LDAP_GROUPS_WHITELIST}"
+
+- kind: "ConfigMap"
+  apiVersion: "v1"
+  metadata:
+    name: "${LDAP_SYNC_CA_CONFIGMAP}"
+    namespace: "${NAMESPACE}"
+    labels:
+      template: "cronjob-ldap-group-sync"
+  data:
+    ldap-ca.crt: "${LDAP_CA_CERT}"
+
+- kind: "Secret"
+  apiVersion: "v1"
+  metadata:
+    name: "${LDAP_BIND_PASSWORD_SECRET}"
+    namespace: "${NAMESPACE}"
+    labels:
+      template: "cronjob-ldap-group-sync"
+  type: "Opaque"
+  stringData:
+    bind_password: "${LDAP_BIND_PASSWORD}"
+
+- kind: "CronJob"
+  apiVersion: "batch/v1beta1"
+  metadata:
+    name: "${JOB_NAME}"
+    namespace: "${NAMESPACE}"
+    labels:
+      template: "cronjob-ldap-group-sync"
+  spec:
+    schedule: "${SCHEDULE}"
+    concurrencyPolicy: "Forbid"
+    successfulJobsHistoryLimit: "${{SUCCESS_JOBS_HISTORY_LIMIT}}"
+    failedJobsHistoryLimit: "${{FAILED_JOBS_HISTORY_LIMIT}}"
+    jobTemplate:
+      spec:
+        backoffLimit: 0
+        template:
+          spec:
+            containers:
+            - name: "${JOB_NAME}"
+              image: "${IMAGE}:${IMAGE_TAG}"
+              command:
+              - "/bin/bash"
+              - "-c"
+              - oc adm groups sync --confirm
+                --sync-config=/ldap-sync/config/ldap-group-sync.yaml
+                $([ -s /ldap-sync/config/whitelist.txt ] && echo --whitelist=/ldap-sync/config/whitelist.txt)
+              volumeMounts:
+              - mountPath: "/ldap-sync/config"
+                name: "ldap-sync-config"
+              - mountPath: "/ldap-sync/ca"
+                name: "ldap-sync-ca"
+              - mountPath: "/ldap-sync/secrets"
+                name: "ldap-bind-password"
+            volumes:
+            - name: "ldap-sync-config"
+              configMap:
+                name: "${LDAP_SYNC_CONFIGMAP}"
+            - name: "ldap-sync-ca"
+              configMap:
+                name: "${LDAP_SYNC_CA_CONFIGMAP}"
+            - name: "ldap-bind-password"
+              secret:
+                secretName: "${LDAP_BIND_PASSWORD_SECRET}"
+            restartPolicy: "Never"
+            terminationGracePeriodSeconds: 30
+            activeDeadlineSeconds: 500
+            dnsPolicy: "ClusterFirst"
+            serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
+            serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+
+- kind: "ClusterRole"
+  apiVersion: "v1"
+  metadata:
+    name: "ldap-group-syncer"
+    namespace: "${NAMESPACE}"
+    labels:
+      template: "cronjob-ldap-group-sync"
+  rules:
+  - apiGroups:
+    - ""
+    - "user.openshift.io"
+    resources:
+    - "groups"
+    verbs:
+    - "get"
+    - "list"
+    - "create"
+    - "update"
+
+- kind: "ClusterRoleBinding"
+  apiVersion: "v1"
+  groupNames: null
+  metadata:
+    name: "system:ldap-group-syncers"
+  roleRef:
+    name: "ldap-group-syncer"
+  subjects:
+  - kind: "ServiceAccount"
+    name: "${JOB_SERVICE_ACCOUNT}"
+  userNames:
+  - "system:serviceaccount:${NAMESPACE}:${JOB_SERVICE_ACCOUNT}"
+
+- kind: "ServiceAccount"
+  apiVersion: "v1"
+  metadata:
+    name: "${JOB_SERVICE_ACCOUNT}"
+    namespace: "${NAMESPACE}"
+    labels:
+      template: "cronjob-ldap-group-sync"
