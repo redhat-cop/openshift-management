@@ -1,6 +1,6 @@
 # Jobs
 
-This directory contains a collection of [jobs](https://docs.openshift.com/container-platform/latest/dev_guide/jobs.html) and [Cron jobs](https://docs.openshift.com/container-platform/latest/dev_guide/cron_jobs.html).
+This directory contains a collection of [jobs](https://docs.openshift.com/container-platform/3.11/dev_guide/jobs.html) and [Cron jobs](https://docs.openshift.com/container-platform/3.11/dev_guide/cron_jobs.html).
 
 The rest of this document describes the specific configurations that are applicable to the execution of certain jobs contained within this directory.
 
@@ -40,7 +40,7 @@ Prior to instantiating the template, the following must be completed:
 
 ### Pruning Resources
 
-The [cronjob-prune-images.yml](cronjob-prune-images.yml) facilitates [image pruning](https://docs.openshift.com/container-platform/latest/admin_guide/pruning_resources.html#pruning-images) of the integrated docker registry while the [cronjob-prune-builds-deployments.yml](cronjob-prune-builds-deployments.yml) facilitates pruning [builds](https://docs.openshift.com/container-platform/latest/admin_guide/pruning_resources.html#pruning-builds) and [deployments](https://docs.openshift.com/container-platform/latest/admin_guide/pruning_resources.html#pruning-deployments) on a regular basis.
+The [cronjob-prune-images.yml](cronjob-prune-images.yml) facilitates [image pruning](https://docs.openshift.com/container-platform/3.11/admin_guide/pruning_resources.html#pruning-images) of the integrated docker registry while the [cronjob-prune-builds-deployments.yml](cronjob-prune-builds-deployments.yml) facilitates pruning [builds](https://docs.openshift.com/container-platform/3.11/admin_guide/pruning_resources.html#pruning-builds) and [deployments](https://docs.openshift.com/container-platform/3.11/admin_guide/pruning_resources.html#pruning-deployments) on a regular basis.
 
 To instantiate the template, run the following.
 
@@ -60,7 +60,7 @@ oc process -f <template_file> \
 
 ### LDAP Group Synchronization
 
-The [cronjob-ldap-group-sync.yml](cronjob-ldap-group-sync.yml) and [cronjob-ldap-group-sync-secure.yml](cronjob-ldap-group-sync-secure.yml) templates facilitate routine [LDAP Group Synchronization](https://docs.openshift.com/container-platform/latest/install_config/syncing_groups_with_ldap.html), synchronizing groups defined in an LDAP directory with OpenShift's internal group storage facility.
+The [cronjob-ldap-group-sync.yml](cronjob-ldap-group-sync.yml) and [cronjob-ldap-group-sync-secure.yml](cronjob-ldap-group-sync-secure.yml) templates facilitate routine [LDAP Group Synchronization](https://docs.openshift.com/container-platform/3.11/install_config/syncing_groups_with_ldap.html), synchronizing groups defined in an LDAP directory with OpenShift's internal group storage facility.
 
 These template makes several assumptions about your LDAP architecture and intentions of your group sync process, and is meant to showcase common use cases seen in the field. It will likely need further updating to accommodate other sync strategies or LDAP architectures.
 
