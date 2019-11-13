@@ -78,6 +78,7 @@ objects:
             dnsPolicy: ClusterFirst
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+    startingDeadlineSeconds: ${{STARTING_DEADLINE_SECONDS}}
 - kind: ClusterRoleBinding
   apiVersion: v1
   metadata:
@@ -166,3 +167,7 @@ parameters:
   name: TAG
   required: true
   value: latest
+- name: STARTING_DEADLINE_SECONDS
+  description: Set the startingDeadlineSeconds for the cronjob
+  required: false
+  value: "60"

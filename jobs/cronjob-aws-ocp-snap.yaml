@@ -92,6 +92,7 @@ objects:
             dnsPolicy: ClusterFirst
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+    startingDeadlineSeconds: ${{STARTING_DEADLINE_SECONDS}}
 - apiVersion: v1
   kind: ClusterRole
   metadata:
@@ -204,3 +205,7 @@ parameters:
   description: "Name of the Service Account To Exeucte the Job As."
   value: "ebs-snap-creator"
   required: true
+- name: STARTING_DEADLINE_SECONDS
+  description: Set the startingDeadlineSeconds for the cronjob
+  required: false
+  value: "60"

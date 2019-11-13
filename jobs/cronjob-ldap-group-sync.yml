@@ -102,6 +102,7 @@ objects:
             dnsPolicy: "ClusterFirst"
             serviceAccountName: "${JOB_SERVICE_ACCOUNT}"
             serviceAccount: "${JOB_SERVICE_ACCOUNT}"
+    startingDeadlineSeconds: ${{STARTING_DEADLINE_SECONDS}}
 
 - kind: "ClusterRole"
   apiVersion: "v1"
@@ -246,3 +247,7 @@ parameters:
     description: "Image Tag to use for the container."
     required: true
     value: "v3.11"
+  - name: STARTING_DEADLINE_SECONDS
+    description: Set the startingDeadlineSeconds for the cronjob
+    required: false
+    value: "60"

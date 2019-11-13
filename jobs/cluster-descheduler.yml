@@ -112,6 +112,7 @@ objects:
             - name: policy-volume
               configMap:
                 name: descheduler-policy-configmap
+    startingDeadlineSeconds: ${{STARTING_DEADLINE_SECONDS}}
 parameters:
 - name: "SCHEDULE"
   displayName: "Cron Schedule"
@@ -171,3 +172,7 @@ parameters:
   description: "Image Tag to use for the container."
   required: true
   value: "v3.11"
+- name: STARTING_DEADLINE_SECONDS
+  description: Set the startingDeadlineSeconds for the cronjob
+  required: false
+  value: "60"
