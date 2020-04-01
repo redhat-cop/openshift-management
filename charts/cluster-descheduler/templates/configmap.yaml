@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  policy.yaml: "apiVersion: descheduler/v1alpha1\nkind: DeschedulerPolicy\nstrategies:\n
+    \ RemoveDuplicates:\n    enabled: {{ .Values.remove_dups }} \n  LowNodeUtilization:\n    enabled:
+    {{ .Values.enable_utilization }} \n    params:\n      nodeResourceUtilizationThresholds:\n
+    \       thresholds:\n          cpu: {{ .Values.min_cpu }}\n          memory: {{ .Values.min_mem }}\n
+    \         pods: {{ .Values.min_pods }}\n        targetThresholds:\n          cpu: {{ .Values.max_cpu }}\n
+    \         memory: {{ .Values.max_mem }}\n          pods: {{ .Values.max_pods }}\n        numberOfNodes:
+    {{ .Values.node_threshold }} \n  RemovePodsViolatingInterPodAntiAffinity:\n    enabled: {{ .Values.enable_affinity_violation }}\n"
+kind: ConfigMap
+metadata:
+  labels:
+    template: cluster-descheduler
+  name: descheduler-policy-configmap
+  namespace: {{ .Values.namespace }}

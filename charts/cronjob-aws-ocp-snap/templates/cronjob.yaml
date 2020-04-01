@@ -1,0 +1,44 @@
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  labels:
+    template: cronjob-aws-ocp-snap
+  name: {{ .Values.job_name }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.failed_jobs_history_limit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          activeDeadlineSeconds: 500
+          containers:
+          - command:
+            - /bin/bash
+            - -c
+            - /usr/local/bin/create_snapshot.sh {{ .Values.nspace }} {{ .Values.vol }}
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: key_id
+                  name: aws-secret
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: access_key
+                  name: aws-secret
+            - name: AWS_DEFAULT_REGION
+              valueFrom:
+                secretKeyRef:
+                  key: region
+                  name: aws-secret
+            image: docker-registry.default.svc:5000/{{ .Values.namespace }}/{{ .Values.name }}:latest
+            name: {{ .Values.job_name }}
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          serviceAccount: {{ .Values.job_service_account }}
+          serviceAccountName: {{ .Values.job_service_account }}
+          terminationGracePeriodSeconds: 30
+  schedule: {{ .Values.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

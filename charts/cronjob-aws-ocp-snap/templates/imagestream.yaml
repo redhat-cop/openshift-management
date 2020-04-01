@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  annotations:
+    description: Keeps track of changes in the application image
+  labels:
+    template: cronjob-aws-ocp-snap
+  name: {{ .Values.name }}

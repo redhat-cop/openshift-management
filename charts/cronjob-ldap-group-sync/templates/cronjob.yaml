@@ -1,0 +1,43 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    template: cronjob-ldap-group-sync
+  name: {{ .Values.job_name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.failed_jobs_history_limit }}
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          activeDeadlineSeconds: 500
+          containers:
+          - command:
+            - /bin/bash
+            - -c
+            - oc adm groups sync --sync-config=/etc/config/ldap-group-sync.yaml --confirm
+              $([ -s /etc/config/whitelist.txt ] && echo --whitelist=/etc/config/whitelist.txt)
+            image: {{ .Values.image }}:{{ .Values.image_tag }}
+            name: {{ .Values.job_name }}
+            volumeMounts:
+            - mountPath: /etc/config
+              name: ldap-sync-volume
+            - mountPath: /etc/secrets
+              name: ldap-bind-password
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          serviceAccount: {{ .Values.job_service_account }}
+          serviceAccountName: {{ .Values.job_service_account }}
+          terminationGracePeriodSeconds: 30
+          volumes:
+          - configMap:
+              name: ldap-config
+            name: ldap-sync-volume
+          - name: ldap-bind-password
+            secret:
+              secretName: {{ .Values.ldap_bind_password_secret }}
+  schedule: {{ .Values.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

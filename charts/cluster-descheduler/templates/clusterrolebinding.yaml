@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    template: cluster-descheduler
+  name: descheduler-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: descheduler-role
+subjects:
+- kind: ServiceAccount
+  name: descheduler-sa
+  namespace: {{ .Values.namespace }}

@@ -1,0 +1,4 @@
+description: Scheduled Task to Perform LDAP Group Synchronization
+name: cronjob-ldap-group-sync-secure
+tags: management,cronjob,ldap,group,sync
+version: v0.0.1

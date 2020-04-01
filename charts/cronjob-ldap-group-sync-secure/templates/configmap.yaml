@@ -1,0 +1,47 @@
+apiVersion: v1
+data:
+  ldap-group-sync.yaml: |
+    kind: "LDAPSyncConfig"
+    apiVersion: "v1"
+    url: "{{ .Values.ldap_url }}"
+    insecure: false
+    bindDN: "{{ .Values.ldap_bind_dn }}"
+    bindPassword:
+      file: "/ldap-sync/secrets/bind_password"
+    ca: "/ldap-sync/ca/ldap-ca.crt"
+    rfc2307:
+      groupsQuery:
+        baseDN: "{{ .Values.ldap_groups_search_base }}"
+        scope: "sub"
+        derefAliases: "never"
+        filter: "{{ .Values.ldap_groups_filter }}"
+        pageSize: 0
+      groupUIDAttribute: "{{ .Values.ldap_group_uid_attribute }}"
+      groupNameAttributes: {{ .Values.ldap_group_name_attributes }}
+      groupMembershipAttributes: {{ .Values.ldap_group_membership_attributes }}
+      usersQuery:
+        baseDN: "{{ .Values.ldap_users_search_base }}"
+        scope: "sub"
+        derefAliases: "never"
+        pageSize: 0
+      userNameAttributes: {{ .Values.ldap_user_name_attributes }}
+      userUIDAttribute: "{{ .Values.ldap_user_uid_attribute }}"
+      tolerateMemberNotFoundErrors: true
+      tolerateMemberOutOfScopeErrors: true
+  whitelist.txt: {{ .Values.ldap_groups_whitelist }}
+kind: ConfigMap
+metadata:
+  labels:
+    template: cronjob-ldap-group-sync-secure
+  name: {{ .Values.ldap_sync_configmap }}
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: v1
+data:
+  ldap-ca.crt: {{ .Values.ldap_ca_cert }}
+kind: ConfigMap
+metadata:
+  labels:
+    template: cronjob-ldap-group-sync-secure
+  name: {{ .Values.ldap_sync_ca_configmap }}
+  namespace: {{ .Values.namespace }}

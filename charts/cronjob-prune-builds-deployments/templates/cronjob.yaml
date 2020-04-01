@@ -1,0 +1,38 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    template: cronjob-prune-builds-deployments
+  name: {{ .Values.job_name }}-{{ .Values.prune_type }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.failed_jobs_history_limit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          activeDeadlineSeconds: 500
+          containers:
+          - command:
+            - /bin/bash
+            - -c
+            - oc adm prune {{ .Values.prune_type }} --keep-complete=$KEEP_COMPLETE --keep-failed=$KEEP_FAILED
+              --keep-younger-than=$KEEP_YOUNGER_THAN --orphans=$PRUNE_ORPHANS --confirm
+            env:
+            - name: KEEP_COMPLETE
+              value: {{ .Values.keep_complete }}
+            - name: KEEP_FAILED
+              value: {{ .Values.keep_failed }}
+            - name: KEEP_YOUNGER_THAN
+              value: {{ .Values.keep_younger_than }}
+            - name: PRUNE_ORPHANS
+              value: {{ .Values.prune_orphans }}
+            image: {{ .Values.image }}:{{ .Values.image_tag }}
+            name: {{ .Values.job_name }}-{{ .Values.prune_type }}
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          serviceAccount: {{ .Values.job_service_account }}
+          serviceAccountName: {{ .Values.job_service_account }}
+          terminationGracePeriodSeconds: 30
+  schedule: {{ .Values.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

@@ -1,0 +1,39 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    template: cluster-descheduler
+  name: descheduler-job
+  namespace: {{ .Values.namespace }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: "1"
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      template:
+        metadata:
+          annotations:
+            scheduler.alpha.kubernetes.io/critical-pod: "true"
+          name: descheduler-pod
+        spec:
+          containers:
+          - command:
+            - /bin/sh
+            - -ec
+            - |
+              /bin/descheduler --policy-config-file /policy-dir/policy.yaml
+            image: {{ .Values.image }}:{{ .Values.image_tag }}
+            name: descheduler
+            volumeMounts:
+            - mountPath: /policy-dir
+              name: policy-volume
+          restartPolicy: Never
+          serviceAccountName: descheduler-sa
+          volumes:
+          - configMap:
+              name: descheduler-policy-configmap
+            name: policy-volume
+  schedule: {{ .Values.schedule }}
+  successfulJobsHistoryLimit: "1"

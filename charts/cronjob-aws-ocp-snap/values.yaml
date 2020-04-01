@@ -1,0 +1,12 @@
+aws_access_key_id: '# TODO: must define a default value for .aws_access_key_id'
+aws_region: '# TODO: must define a default value for .aws_region'
+aws_secret_access_key: '# TODO: must define a default value for .aws_secret_access_key'
+failed_jobs_history_limit: "5"
+job_name: cronjob-ebs-snaphost
+job_service_account: ebs-snap-creator
+name: cronjob-aws-ocp-snap
+namespace: cluster-maintenance
+nspace: '# TODO: must define a default value for .nspace'
+schedule: '@daily'
+success_jobs_history_limit: "5"
+vol: '# TODO: must define a default value for .vol'
