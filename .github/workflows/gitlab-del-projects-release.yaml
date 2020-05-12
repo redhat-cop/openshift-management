@@ -1,0 +1,28 @@
+name: Gitlab Delete Projects Release Tag
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: tag with release version
+      uses: tinact/docker.image-retag@1.0.2
+      with:
+        image_name: mcanoy/gitlab-cleanup
+        image_old_tag: ${{ github.sha }}
+        image_new_tag: ${{ github.event.release.tag_name }}
+        registry: quay.io
+        registry_username: ${{ secrets.QUAY_USERNAME }}
+        registry_password: ${{ secrets.QUAY_PASSWORD }}
+    - name: tag with latest
+      uses: tinact/docker.image-retag@1.0.2
+      with:
+        image_name: mcanoy/gitlab-cleanup
+        image_old_tag: ${{ github.sha }}
+        registry: quay.io
+        registry_username: ${{ secrets.QUAY_USERNAME }}
+        registry_password: ${{ secrets.QUAY_PASSWORD }}
