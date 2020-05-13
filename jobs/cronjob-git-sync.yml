@@ -70,6 +70,7 @@ objects:
             terminationGracePeriodSeconds: 30
             activeDeadlineSeconds: 500
             dnsPolicy: "ClusterFirst"
+    startingDeadlineSeconds: ${{STARTING_DEADLINE_SECONDS}}
 parameters:
   - name: "JOB_NAME"
     displayName: "Job Name"
@@ -136,5 +137,9 @@ parameters:
     description: "Image Tag to use for the container."
     required: true
     value: "latest"
+  - name: STARTING_DEADLINE_SECONDS
+    description: Set the startingDeadlineSeconds for the cronjob
+    required: false
+    value: "60"
 labels:
   template: "cronjob-git-sync"
