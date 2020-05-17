@@ -4,6 +4,11 @@
 
 A cronjob that enables OpenShift to delete Gitlab projects that have become stale by checking the age of a repo. This also deletes groups that have no projects. Provide the job a top level group and it will search all projects under it and delete stale ones based on last activity and also remove empty groups.
 
+The cronjob will not delete in the follow cases:
+
+1. A group with the text `DO_NOT_DELETE` in the description will not delete the group, any subgroup and projects in the group and subgroups.
+2.  A project wit the text `DO_NOT_DELETE` in the description or a tag `DO_NOT_DELETE` in the tag list.
+
 **Caution:** this jobs performs hard deletes. The actual deletion policy is influenced by overarching settings in Gitlab.
 
 ## Using This Chart

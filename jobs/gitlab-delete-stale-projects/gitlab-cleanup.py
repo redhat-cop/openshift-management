@@ -38,6 +38,7 @@ def check_env_vars():
 # if a group has no projects or subgroups it should also be deleted
 # careful - recursion in use
 def clean_group(group_id, group_name):
+    # let's us know if the group represented by group_id was deleted. This is the return value
     cleanGroupDeleted = False
 
     logger.debug(f'clean group {group_id} - {group_name}')
@@ -46,10 +47,13 @@ def clean_group(group_id, group_name):
     subgroup_count = len(subgroups)
 
     for subgroup in subgroups:
-        deleted = clean_group(subgroup['id'], subgroup['name'])
-        logger.debug(f"subgroup {subgroup['name']}")
-        if deleted:
-            subgroup_count -= 1
+        if 'DO_NOT_DELETE' in subgroup['description']:
+            logger.info(f"Group {subgroup['name']} with subgroups and projects are not eligible for deletion")
+        else:
+            deleted = clean_group(subgroup['id'], subgroup['name'])
+            logger.debug(f"subgroup {subgroup['name']}")
+            if deleted:
+                subgroup_count -= 1
 
     projects = find_projects(group_id)
     all_projects_deleted = True
@@ -143,6 +147,12 @@ def is_project_stale(project):
     shouldDelete = False
 
     logger.debug(f"is_project stale {project['path_with_namespace']}")
+
+    doNotDeleteInDesc = project['description'] is not None and 'DO_NOT_DELETE' in project['description']
+
+    if doNotDeleteInDesc or 'DO_NOT_DELETE' in project['tag_list']:
+        logger.info(f"Project {project['path_with_namespace']} is not eligible for deletion")
+        return shouldDelete
 
     lastActivity = datetime.datetime.strptime(project['last_activity_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
     passedTime = currentTime - lastActivity
