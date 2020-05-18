@@ -47,7 +47,7 @@ The following variables maybe configured.
 | `cron.schedule`  | cronjob | The cron schedule | `"1 0 * * *"` |
 | `cron.historyLimit`  | cronjob | The amount of job runs to retain. | `5` |
 | `generateSecret`  | secret | If true, then helm will generate the secret with values set at `env.secret.xxx`. | `false` |
-| `env.deleteAfterInHours`  | cronjob | The job will delete itetms that are older than this amount of time. | `100 years` |
+| `env.deleteAfterInHours`  | cronjob | The job will delete itetms that are older than this amount of time. | `1 year` |
 | `env.dryRun`  | cronjob | If true, then this job will not perform the deletes. Good for tetsting. | `true` |
 | `env.logLevel`  | cronjob | Set the application log level. | `INFO` |
 | `env.secret.name`  | cronjob, secret | A reference to an opaque secret that is deployed in the same namespace. Can be generated if necessary. | `secret-gitlab-info` |
