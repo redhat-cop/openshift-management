@@ -107,7 +107,7 @@ parameters:
   displayName: "Image"
   description: "Image to use for the container."
   required: true
-  value: "quay.io/openshift/origin-cli:latest"
+  value: "quay.io/openshift/origin-cli"
 - name: "IMAGE_TAG"
   displayName: "Image Tag"
   description: "Image Tag to use for the container."
