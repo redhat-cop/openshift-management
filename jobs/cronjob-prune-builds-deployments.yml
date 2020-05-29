@@ -127,12 +127,12 @@ parameters:
   displayName: "Image"
   description: "Image to use for the container."
   required: true
-  value: "registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7"
+  value: "quay.io/openshift/origin-cli:latest"
 - name: "IMAGE_TAG"
   displayName: "Image Tag"
   description: "Image Tag to use for the container."
   required: true
-  value: "v3.11"
+  value: "v4.4"
 - name: STARTING_DEADLINE_SECONDS
   description: Set the startingDeadlineSeconds for the cronjob
   required: false
