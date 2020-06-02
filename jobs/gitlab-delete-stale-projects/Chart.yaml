@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: v2
 name: gitlab-cleanup
 description: A Helm chart to clean up stale gitlab groups and projects
 
