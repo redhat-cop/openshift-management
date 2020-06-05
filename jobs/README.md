@@ -80,7 +80,7 @@ We'll build a filter to return these groups in LDAP. Something like:
 (&(objectclass=ipausergroup)(memberOf=cn=openshift-users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))
 ```
 
-#### Setup
+#### Cron Job Setup
 
 The `cronjob-ldap-group-sync.yml` template creates several objects in OpenShift.
 
@@ -110,24 +110,26 @@ To instantiate the template, run the following.
 	| oc create -f-
 	```
 
+#### Secure Cron Job Setup
+
 The `cronjob-ldap-group-sync-secure.yml` template uses TLS security and creates the additional object in OpenShift:
 
 * A `ConfigMap` containing the TLS certificate bundle for validating the LDAP server identity
 
 To instatiate the secure ldap group sync template template add the `LDAP_CA_CERT` parameter:
 
-	```
-	oc process -f jobs/cronjob-ldap-group-sync.yml \
-	  -p NAMESPACE="<project name from previous step>"
-	  -p LDAP_URL="ldap://idm-2.etl.rht-labs.com:389" \
-	  -p LDAP_BIND_DN="uid=ldap-user,cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
-	  -p LDAP_BIND_PASSWORD="password1" \
-	  -p LDAP_CA_CERT="$(cat /path/to/ldap-ca.crt)" \
-	  -p LDAP_GROUPS_SEARCH_BASE="cn=groups,cn=accounts,dc=myorg,dc=example,dc=com" \
-	  -p LDAP_GROUPS_FILTER="(&(objectclass=ipausergroup)(memberOf=cn=ose_users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))" \
-	  -p LDAP_USERS_SEARCH_BASE="cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
-	| oc create -f-
-	```
+```
+oc process -f jobs/cronjob-ldap-group-sync-secure.yml \
+  -p NAMESPACE="<project name from previous step>"
+  -p LDAP_URL="ldaps://idm-2.etl.rht-labs.com:636" \
+  -p LDAP_BIND_DN="uid=ldap-user,cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
+  -p LDAP_BIND_PASSWORD="password1" \
+  -p LDAP_CA_CERT="$(cat /path/to/ldap-ca.crt)" \
+  -p LDAP_GROUPS_SEARCH_BASE="cn=groups,cn=accounts,dc=myorg,dc=example,dc=com" \
+  -p LDAP_GROUPS_FILTER="(&(objectclass=ipausergroup)(memberOf=cn=ose_users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))" \
+  -p LDAP_USERS_SEARCH_BASE="cn=users,cn=accounts,dc=myorg,dc=example,dc=com" \
+| oc create -f-
+```
 
 #### Cleanup
 
