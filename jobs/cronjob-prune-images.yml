@@ -112,7 +112,7 @@ parameters:
   displayName: "Image Tag"
   description: "Image Tag to use for the container."
   required: true
-  value: "v4.4"
+  value: "4.4"
 - name: STARTING_DEADLINE_SECONDS
   description: Set the startingDeadlineSeconds for the cronjob
   required: false
