@@ -1,0 +1,29 @@
+name: Gitlab Delete Projects Container
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - jobs/gitlab-delete-stale-projects/**
+      - .github/workflows/gitlab-del-projects-container-build.yaml
+
+jobs:
+  build-gitlab-delete-project:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: echo var
+      run: |
+        echo version name is: ${{ github.event.repository.name }}
+        echo repository is: ${{ github.repository }}
+    - name: Login quay.io
+      run: echo ${{ secrets.QUAY_PASSWORD }} | docker login quay.io -u ${{ secrets.QUAY_USERNAME }} --password-stdin
+    - name: Build Container
+      run: docker build jobs/gitlab-delete-stale-projects -t quay.io/redhat-cop/gitlab-cleanup:${{ github.sha }}
+    - name: Push Container 
+      run: docker push quay.io/redhat-cop/gitlab-cleanup:${{ github.sha }}
+    - name: Tag Latest
+      run: docker tag quay.io/redhat-cop/gitlab-cleanup:${{ github.sha }} quay.io/redhat-cop/gitlab-cleanup:master
+    - name: Push branch tag
+      run: docker push quay.io/redhat-cop/gitlab-cleanup:master

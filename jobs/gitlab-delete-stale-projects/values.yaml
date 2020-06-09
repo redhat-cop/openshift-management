@@ -1,0 +1,21 @@
+name: gitlab-cleanup
+
+image:
+  name: "quay.io/redhat-cop/gitlab-cleanup"
+  tag: "master" # This is intended to be overridden by the parent Helm chart.
+
+generateSecret: false # set true if you want to create the secret data file.
+
+env:
+  secret:
+    name: secret-gitlab-info # cronjob references this secret
+    personalAccessToken: xxxx # real value needed if useSecret=true
+  gitlabApiUrl: http://gitlab.ca 
+  parentGroupId: 6 # top level group to search
+  deleteAfterInHours: 876000 # 1 year
+  dryRun: TRUE # set this to false to delete something
+  logLevel: DEBUG
+
+cron:
+  schedule: "1 0 * * *"
+  historyLimit: 5
