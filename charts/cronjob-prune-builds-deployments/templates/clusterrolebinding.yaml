@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    template: cronjob-prune-builds-deployments
+  name: system:build-pruners
+roleRef:
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.job_service_account }}
+userNames:
+- system:serviceaccount:{{ .Values.namespace }}:{{ .Values.job_service_account }}

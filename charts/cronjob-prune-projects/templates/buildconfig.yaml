@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  annotations:
+    description: Defines how to build the application
+  labels:
+    template: cronjob-prune-projects
+  name: {{ .Values.name }}
+spec:
+  completionDeadlineSeconds: 1800
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Values.name }}:{{ .Values.tag }}
+  runPolicy: Serial
+  source:
+    contextDir: {{ .Values.context_dir }}
+    git:
+      ref: {{ .Values.source_repository_ref }}
+      uri: {{ .Values.source_repository_url }}
+  strategy:
+    dockerStrategy:
+      from:
+        kind: DockerImage
+        name: {{ .Values.base_image }}
+    type: Docker
+  triggers:
+  - type: ConfigChange

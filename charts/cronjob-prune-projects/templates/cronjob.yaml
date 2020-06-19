@@ -1,0 +1,35 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    template: cronjob-prune-projects
+  name: {{ .Values.job_name }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.failed_jobs_history_limit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          activeDeadlineSeconds: 500
+          containers:
+          - command:
+            - /bin/bash
+            - -c
+            - /usr/local/bin/prune-ocp-projects.sh
+            env:
+            - name: PROJECT_EXCLUDE_USER
+              value: {{ .Values.project_exclude_user }}
+            - name: PROJECT_EXCLUDE_SYSTEM
+              value: {{ .Values.namespace }} {{ .Values.project_exclude_system }}
+            - name: TIMESTAMP_HOURS_AGO
+              value: {{ .Values.timestamp_hours_ago }}
+            image: {{ .Values.name }}:{{ .Values.tag }}
+            name: {{ .Values.job_name }}
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          serviceAccount: {{ .Values.job_service_account }}
+          serviceAccountName: {{ .Values.job_service_account }}
+          terminationGracePeriodSeconds: 30
+  schedule: {{ .Values.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

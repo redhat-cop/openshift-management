@@ -1,0 +1,55 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    template: cronjob-git-sync
+  name: {{ .Values.job_name }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.failed_jobs_history_limit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          activeDeadlineSeconds: 500
+          containers:
+          - command:
+            - /bin/bash
+            - -c
+            - |
+              mkdir ~/.ssh
+              chmod 700 ~/.ssh
+              printf 'host {{ .Values.git_host }}\n PreferredAuthentications publickey\n IdentitiesOnly yes\n HostName {{ .Values.git_host }}\n IdentityFile /etc/secret-volume/ssh-privatekey\n User git\n' >> ~/.ssh/config
+              printf 'host {{ .Values.git_sync_host }}\n PreferredAuthentications publickey\n IdentitiesOnly yes\n HostName {{ .Values.git_sync_host }}\n IdentityFile /etc/secret-volume/ssh-privatekey\n User git\n' >> ~/.ssh/config
+              chmod 400 ~/.ssh/config
+              ssh-keyscan -p {{ .Values.git_sync_port }} -H {{ .Values.git_sync_host }} >> ~/.ssh/known_hosts
+              ssh-keyscan -p {{ .Values.git_port }} -H {{ .Values.git_host }} >> ~/.ssh/known_hosts
+              USER_ID=$(id -u)
+              GROUP_ID=$(id -g)
+              echo "gitsync:x:${USER_ID}:${GROUP_ID}:Git Sync User:${HOME}:/sbin/nologin" > ~/passwd
+              echo "root:x:${GROUP_ID}:" > ~/group
+              LD_PRELOAD=libnss_wrapper.so NSS_WRAPPER_PASSWD=~/passwd NSS_WRAPPER_GROUP=~/group git clone ssh://git@{{ .Values.git_host }}:{{ .Values.git_port }}/{{ .Values.git_repo }} /tmp/temp
+              cd /tmp/temp
+              for branch in $(git branch -a | grep remotes | grep -v HEAD | grep -v master); do git branch --track ${branch#remotes/origin/} $branch; done
+              LD_PRELOAD=libnss_wrapper.so NSS_WRAPPER_PASSWD=~/passwd NSS_WRAPPER_GROUP=~/group git remote add backup ssh://git@{{ .Values.git_sync_host }}:{{ .Values.git_sync_port }}/{{ .Values.git_sync_repo }}
+              LD_PRELOAD=libnss_wrapper.so NSS_WRAPPER_PASSWD=~/passwd NSS_WRAPPER_GROUP=~/group git push -f --all backup
+            env:
+            - name: GIT_COMMITTER_NAME
+              value: hello
+            - name: GIT_COMMITTER_EMAIL
+              value: hello@world.com
+            image: {{ .Values.image }}:{{ .Values.image_tag }}
+            name: {{ .Values.job_name }}
+            volumeMounts:
+            - mountPath: /etc/secret-volume
+              name: secret-volume
+              readOnly: true
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 30
+          volumes:
+          - name: secret-volume
+            secret:
+              secretName: {{ .Values.ssh_key_secret_name }}
+  schedule: {{ .Values.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

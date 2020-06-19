@@ -1,0 +1,4 @@
+description: Scheduled Task to Perform Git Repo Synchronization
+name: cronjob-git-sync
+tags: management,cronjob,git,sync
+version: v0.0.1

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ClusterRole
+metadata:
+  labels:
+    template: cronjob-aws-ocp-snap
+  name: pvc-reader
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - storage.k8s.io
+  resources:
+  - storageclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  - persistentvolumeclaims
+  verbs:
+  - get
+  - list
+  - watch

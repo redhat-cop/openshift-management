@@ -1,0 +1,34 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    template: cronjob-prune-images
+  name: {{ .Values.job_name }}
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.failed_jobs_history_limit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          activeDeadlineSeconds: 500
+          containers:
+          - command:
+            - /bin/bash
+            - -c
+            - oc adm prune images --keep-tag-revisions=$IMAGE_PRUNE_KEEP_TAG_REVISIONS
+              --keep-younger-than=$IMAGE_PRUNE_KEEP_YOUNGER_THAN --confirm
+            env:
+            - name: IMAGE_PRUNE_KEEP_TAG_REVISIONS
+              value: {{ .Values.image_prune_keep_tag_revisions }}
+            - name: IMAGE_PRUNE_KEEP_YOUNGER_THAN
+              value: {{ .Values.image_prune_keep_younger_than }}
+            image: {{ .Values.image }}:{{ .Values.image_tag }}
+            name: {{ .Values.job_name }}
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          serviceAccount: {{ .Values.job_service_account }}
+          serviceAccountName: {{ .Values.job_service_account }}
+          terminationGracePeriodSeconds: 30
+  schedule: {{ .Values.schedule }}
+  successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

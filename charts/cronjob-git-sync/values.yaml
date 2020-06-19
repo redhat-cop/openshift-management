@@ -1,0 +1,14 @@
+failed_jobs_history_limit: "5"
+git_host: '# TODO: must define a default value for .git_host'
+git_port: "22"
+git_private_key: '# TODO: must define a default value for .git_private_key'
+git_repo: '# TODO: must define a default value for .git_repo'
+git_sync_host: '# TODO: must define a default value for .git_sync_host'
+git_sync_port: "22"
+git_sync_repo: '# TODO: must define a default value for .git_sync_repo'
+image: registry.access.redhat.com/openshift3/python-33-rhel7
+image_tag: latest
+job_name: cronjob-git-sync
+schedule: '@hourly'
+ssh_key_secret_name: ssh-key-secret
+success_jobs_history_limit: "5"

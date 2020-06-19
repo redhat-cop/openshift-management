@@ -1,0 +1,14 @@
+apiVersion: v1
+groupNames: null
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    template: cronjob-ldap-group-sync-secure
+  name: system:ldap-group-syncers
+roleRef:
+  name: ldap-group-syncer
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.job_service_account }}
+userNames:
+- system:serviceaccount:{{ .Values.namespace }}:{{ .Values.job_service_account }}

@@ -1,0 +1,10 @@
+failed_jobs_history_limit: "5"
+image: registry.access.redhat.com/openshift3/jenkins-slave-base-rhel7
+image_prune_keep_tag_revisions: "3"
+image_prune_keep_younger_than: 1h0m0s
+image_tag: v3.11
+job_name: cronjob-prune-images
+job_service_account: pruner
+namespace: cluster-ops
+schedule: 0 0 * * *
+success_jobs_history_limit: "5"

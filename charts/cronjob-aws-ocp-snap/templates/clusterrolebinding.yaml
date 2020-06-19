@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    template: cronjob-aws-ocp-snap
+  name: system:pvc-reader
+roleRef:
+  name: pvc-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.job_service_account }}
+userNames:
+- system:serviceaccount:{{ .Values.namespace }}:{{ .Values.job_service_account }}

@@ -1,0 +1,24 @@
+failed_jobs_history_limit: "5"
+image: registry.access.redhat.com/openshift3/ose-cli
+image_tag: v3.11
+job_name: cronjob-ldap-group-sync
+job_service_account: ldap-group-syncer
+ldap_bind_dn: '# TODO: must define a default value for .ldap_bind_dn'
+ldap_bind_password: '# TODO: must define a default value for .ldap_bind_password'
+ldap_bind_password_secret: ldap-bind-password
+ldap_ca_cert: '# TODO: must define a default value for .ldap_ca_cert'
+ldap_group_membership_attributes: '["member"]'
+ldap_group_name_attributes: '["cn"]'
+ldap_group_uid_attribute: ipaUniqueID
+ldap_groups_filter: (&(objectclass=ipausergroup)(memberOf=cn=openshift-users,cn=groups,cn=accounts,dc=myorg,dc=example,dc=com))
+ldap_groups_search_base: cn=groups,cn=accounts,dc=myorg,dc=example,dc=com
+ldap_groups_whitelist: '# TODO: must define a default value for .ldap_groups_whitelist'
+ldap_sync_ca_configmap: ldap-group-sync-ca
+ldap_sync_configmap: ldap-group-sync
+ldap_url: '# TODO: must define a default value for .ldap_url'
+ldap_user_name_attributes: '["uid"]'
+ldap_user_uid_attribute: dn
+ldap_users_search_base: cn=users,cn=accounts,dc=myorg,dc=example,dc=com
+namespace: openshift-cluster-ops
+schedule: '@hourly'
+success_jobs_history_limit: "5"
