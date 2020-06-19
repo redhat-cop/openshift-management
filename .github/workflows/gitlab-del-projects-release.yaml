@@ -22,7 +22,7 @@ jobs:
       uses: tinact/docker.image-retag@1.0.2
       with:
         image_name: redhat-cop/gitlab-cleanup
-        image_old_tag: ${{ github.sha }}
+        image_old_tag: master
         registry: quay.io
         registry_username: ${{ secrets.QUAY_USERNAME }}
         registry_password: ${{ secrets.QUAY_PASSWORD }}
