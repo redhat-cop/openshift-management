@@ -32,9 +32,9 @@ cd openshift-management/charts/cronjob-gitlab-delete-projects
 ```
 helm template . \
   --set env.secret.name=my-openshift-secret-ref \
-  --set env.secret.gitlabApiUrl=https//my.gitlab.base.com \
+  --set env.gitlabApiUrl=https//my.gitlab.base.com \
   --set env.secret.personalAccessToken=bot-token-value \
-  --set env.secret.parentRepoId=-1 \
+  --set env.parentGroupId=-1 \
 | oc apply -f - -n target-namespace
 ```
 
