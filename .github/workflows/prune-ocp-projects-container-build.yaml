@@ -1,0 +1,29 @@
+name: OpenShift Container Platform Prune Projects Container
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - images/prune-ocp-projects/**
+      - .github/workflows/prune-ocp-projects-container-build.yaml
+
+jobs:
+  build-prune-ocp-projects
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: echo var
+      run: |
+        echo version name is: ${{ github.event.repository.name }}
+        echo repository is: ${{ github.repository }}
+    - name: Login quay.io
+      run: echo ${{ secrets.QUAY_PASSWORD }} | docker login quay.io -u ${{ secrets.QUAY_USERNAME }} --password-stdin
+    - name: Build Container
+      run: docker build images/prune-ocp-projects -t quay.io/redhat-cop/prune-ocp-projects:${{ github.sha }}
+    - name: Push Container 
+      run: docker push quay.io/redhat-cop/prune-ocp-projects:${{ github.sha }}
+    - name: Tag Latest
+      run: docker tag quay.io/redhat-cop/prune-ocp-projects:${{ github.sha }} quay.io/redhat-cop/prune-ocp-projects:master
+    - name: Push branch tag
+      run: docker push quay.io/redhat-cop/prune-ocp-projects:master

@@ -24,7 +24,7 @@ git clone https://github.com/redhat-cop/openshift-management.git
 2. Change into ths job's directory
 
 ```
-cd openshift-management/charts/gitlab-delete-stale-projects
+cd openshift-management/charts/cronjob-gitlab-delete-projects
 ```
 
 3. Deploy using the follow Helm command:

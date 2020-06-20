@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - jobs/gitlab-delete-stale-projects/**
+      - images/gitlab-delete-stale-projects/**
       - .github/workflows/gitlab-del-projects-container-build.yaml
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
     - name: Login quay.io
       run: echo ${{ secrets.QUAY_PASSWORD }} | docker login quay.io -u ${{ secrets.QUAY_USERNAME }} --password-stdin
     - name: Build Container
-      run: docker build jobs/gitlab-delete-stale-projects -t quay.io/redhat-cop/gitlab-cleanup:${{ github.sha }}
+      run: docker build images/gitlab-delete-stale-projects -t quay.io/redhat-cop/gitlab-cleanup:${{ github.sha }}
     - name: Push Container 
       run: docker push quay.io/redhat-cop/gitlab-cleanup:${{ github.sha }}
     - name: Tag Latest
