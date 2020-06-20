@@ -1,4 +1,4 @@
-name: Prune OpenShift Containre Platform Projects Release Tag
+name: Prune OpenShift Container Platform Projects Release Tag
 
 on:
   release:
