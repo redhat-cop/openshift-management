@@ -9,7 +9,7 @@ on:
       - .github/workflows/prune-ocp-projects-container-build.yaml
 
 jobs:
-  build-prune-ocp-projects
+  build-prune-ocp-projects:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
