@@ -21,9 +21,9 @@ dry_run = os.environ.get('DRY_RUN').lower() == 'true'
 
 def check_env_vars():
     if parent_group_id is None:
-        raise ValueError('OMP Parent Group (PARENT_GROUP_ID) is required')
+        raise ValueError('Parent Group (PARENT_GROUP_ID) is required')
     if not parent_group_id.isnumeric():
-        raise ValueError('OMP Parent Group (PARENT_GROUP_ID) has an invalid value of ' + parent_group)
+        raise ValueError('Parent Group (PARENT_GROUP_ID) has an invalid value of ' + parent_group)
     if not git_token:
         raise ValueError('Git Token (GIT_TOKEN) is required')
     if not git_base_url:

@@ -53,4 +53,4 @@ The following variables maybe configured.
 | `env.secret.name`  | cronjob, secret | A reference to an opaque secret that is deployed in the same namespace. Can be generated if necessary. | `secret-gitlab-info` |
 | `env.gitlabApiUrl`  | cronjob | The url of the gitlab instance |
 | `env.secret.personalAccessToken`  | secret | The personal access token for the user accessing gitlab. Bot recommended |
-| `env.parentGroupId`  | cronjob | A reference to an opaque secret. Can be generated if necessary. |
+| `env.parentGroupId`  | cronjob | Group ID of the GitLab (sub)group to look for projects to delete. |
