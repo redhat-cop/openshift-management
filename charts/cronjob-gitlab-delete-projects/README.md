@@ -24,7 +24,7 @@ git clone https://github.com/redhat-cop/openshift-management.git
 2. Change into ths job's directory
 
 ```
-cd openshift-management/charts/gitlab-delete-stale-projects
+cd openshift-management/charts/cronjob-gitlab-delete-projects
 ```
 
 3. Deploy using the follow Helm command:
@@ -32,9 +32,9 @@ cd openshift-management/charts/gitlab-delete-stale-projects
 ```
 helm template . \
   --set env.secret.name=my-openshift-secret-ref \
-  --set env.secret.gitlabApiUrl=https//my.gitlab.base.com \
+  --set env.gitlabApiUrl=https//my.gitlab.base.com \
   --set env.secret.personalAccessToken=bot-token-value \
-  --set env.secret.parentRepoId=-1 \
+  --set env.parentGroupId=-1 \
 | oc apply -f - -n target-namespace
 ```
 
@@ -53,20 +53,4 @@ The following variables maybe configured.
 | `env.secret.name`  | cronjob, secret | A reference to an opaque secret that is deployed in the same namespace. Can be generated if necessary. | `secret-gitlab-info` |
 | `env.gitlabApiUrl`  | cronjob | The url of the gitlab instance |
 | `env.secret.personalAccessToken`  | secret | The personal access token for the user accessing gitlab. Bot recommended |
-| `env.parentGroupId`  | cronjob | A reference to an opaque secret. Can be generated if necessary. |
-
-## Development
-
-The container can be built and run locally
-
-To build:
-
-```
-docker build . -t gitlab-clean
-```
-
-To run:
-
-```
-docker run -e DRY_RUN=true -e PARENT_GROUP_ID=-10 -e GIT_TOKEN=xxxxx -e GITLAB_API_URL=https://gitlab.com -e DELETE_AFTER_HOURS=240000 -e LOG_LEVEL=DEBUG gitlab-clean
-```
+| `env.parentGroupId`  | cronjob | Group ID of the GitLab (sub)group to look for projects to delete. |
