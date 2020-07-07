@@ -7,9 +7,23 @@ A cronjob that enables OpenShift to delete Gitlab projects that have become stal
 The cronjob will not delete in the follow cases:
 
 1. A group with the text `DO_NOT_DELETE` in the description will not delete the group, any subgroup and projects in the group and subgroups.
-2.  A project wit the text `DO_NOT_DELETE` in the description or a tag `DO_NOT_DELETE` in the tag list.
+2. A project wit the text `DO_NOT_DELETE` in the description or a tag `DO_NOT_DELETE` in the tag list.
 
 **Caution:** this jobs performs hard deletes. The actual deletion policy is influenced by overarching settings in Gitlab.
+
+## Notification / Hook
+
+This job has the ability to notify applications via a webhook. Specify the url to post to and the value of the secret header `x-cleanup-token` for the request to be invoked.
+
+The json payload will look like
+
+```
+{
+  "event_name": "project_deleted", # or group_deleted
+  "group_id": 1424, # only set if group was deleted
+  "project" { ...} # the full gitlab project structure, only set if project was deleted
+}
+```
 
 ## Using This Chart
 
@@ -54,3 +68,5 @@ The following variables maybe configured.
 | `env.gitlabApiUrl`  | cronjob | The url of the gitlab instance |
 | `env.secret.personalAccessToken`  | secret | The personal access token for the user accessing gitlab. Bot recommended |
 | `env.parentGroupId`  | cronjob | Group ID of the GitLab (sub)group to look for projects to delete. |
+| `env.secret.notificationToken` | secret | The access token for the notification application |
+| `env.notificationUrl` | cronjob | The url to notify when a delete has occurred | 

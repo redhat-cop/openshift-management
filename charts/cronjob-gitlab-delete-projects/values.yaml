@@ -9,7 +9,8 @@ generateSecret: false # set true if you want to create the secret data file.
 env:
   secret:
     name: secret-gitlab-info # cronjob references this secret
-    personalAccessToken: xxxx # real value needed if useSecret=true
+    personalAccessToken: xxxx # real value needed if generateSecret=true
+    notificationToken: yyyy # real value needed if generateSecret=true
   gitlabApiUrl: http://gitlab.ca 
   parentGroupId: 6 # top level group to search
   deleteAfterInHours: 876000 # 1 year
