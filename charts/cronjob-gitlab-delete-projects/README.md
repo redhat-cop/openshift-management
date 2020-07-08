@@ -13,7 +13,7 @@ The cronjob will not delete in the follow cases:
 
 ## Notification / Hook
 
-This job has the ability to notify applications via a webhook. Specify the url to post to and the value of the secret header `x-cleanup-token` for the request to be invoked.
+This job has the ability to notify applications via a webhook. Specify the url to post to and the value of the secret header `x-notification-token` for the request to be invoked.
 
 The json payload will look like
 
