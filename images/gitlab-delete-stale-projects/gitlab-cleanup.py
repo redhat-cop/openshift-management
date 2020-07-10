@@ -17,6 +17,8 @@ git_token = os.environ.get('GIT_TOKEN')
 parent_group_id = os.environ.get('PARENT_GROUP_ID')
 delete_after_hours_string = os.environ.get('DELETE_AFTER_HOURS')
 delete_after_hours = 2147483647 # default but line above must be set and is enforced
+notification_url = os.environ.get('NOTIFICATION_URL')
+notification_token = os.environ.get('NOTIFICATION_TOKEN')
 dry_run = os.environ.get('DRY_RUN').lower() == 'true'
 
 def check_env_vars():
@@ -102,11 +104,9 @@ def find_projects(group_id):
 # end find_projects
 
 def delete_group(group_id, group_name):
+    logger.info(f'delete group {group_id} {group_name} dry-run {dry_run}')
     if(group_name == 'PARENT'):
         return False;
-
-def delete_group(group_id, group_name):
-    logger.info(f'delete group {group_id} {group_name} dry-run {dry_run}')
 
     if not dry_run:
         response = requests.delete(
@@ -120,6 +120,7 @@ def delete_group(group_id, group_name):
 
         logger.error(f"Failed to delete group {group_id} code {response.status}")
 
+    notifyGroup(group_id)
     return False
 # end delete_group
 
@@ -139,6 +140,7 @@ def delete_project(project):
 
         logger.error(f"Failed to delete project {project_id} { project['name']}  code {response.status}")
 
+    notifyProject(project)
     return False
 #end delete_project
 
@@ -165,6 +167,22 @@ def is_project_stale(project):
 
     return shouldDelete
 # end is_project_stale
+
+def notifyProject(project):
+    notify(project, None)
+
+def notifyGroup(group_id):
+    notify(None, group_id)
+
+def notify(project, group_id):
+    if notification_url is None or notification_token is None:
+        logger.debug("Notifications not configured")
+        return False
+    
+    requests.post(
+        notification_url, headers={"x-notification-token": notification_token, 'Content-type': 'application/json'},
+        json={"event_name": "project_deleted" if project is not None else "group_deleted", "project": project, "group_id": group_id}
+    )
 
 check_env_vars()
 

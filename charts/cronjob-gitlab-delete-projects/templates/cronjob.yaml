@@ -25,10 +25,17 @@ spec:
               value: {{ .Values.env.gitlabApiUrl }}
             - name: PARENT_GROUP_ID
               value: "{{ .Values.env.parentGroupId }}"
+            - name: NOTIFICATION_URL
+              value: "{{ .Values.env.notificationUrl }}"
             - name: GIT_TOKEN
               valueFrom:
                 secretKeyRef:
                   key: GITLAB_PERSONAL_ACCESS_TOKEN
+                  name: {{ .Values.env.secret.name }}
+            - name: NOTIFICATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: NOTIFICATION_TOKEN
                   name: {{ .Values.env.secret.name }}
             imagePullPolicy: Always
             name: {{ .Values.name }}
