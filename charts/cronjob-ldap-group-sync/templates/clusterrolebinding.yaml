@@ -4,7 +4,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     template: cronjob-ldap-group-sync
-  name: system:ldap-group-syncers
+  name: {{ .Values.namespace }}-ldap-group-syncers
 roleRef:
   name: ldap-group-syncer
 subjects:
