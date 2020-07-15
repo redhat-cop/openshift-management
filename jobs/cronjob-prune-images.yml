@@ -27,8 +27,8 @@ objects:
               command:
               - "/bin/bash"
               - "-c"
-              - oc adm prune images --keep-tag-revisions=$IMAGE_PRUNE_KEEP_TAG_REVISIONS
-                --keep-younger-than=$IMAGE_PRUNE_KEEP_YOUNGER_THAN --confirm
+              - oc adm prune images --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt 
+                --keep-tag-revisions=$IMAGE_PRUNE_KEEP_TAG_REVISIONS --keep-younger-than=$IMAGE_PRUNE_KEEP_YOUNGER_THAN --confirm
               env:
               - name: IMAGE_PRUNE_KEEP_TAG_REVISIONS
                 value: "${IMAGE_PRUNE_KEEP_TAG_REVISIONS}"
