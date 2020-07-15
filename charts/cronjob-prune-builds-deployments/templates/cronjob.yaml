@@ -20,13 +20,13 @@ spec:
               --keep-younger-than=$KEEP_YOUNGER_THAN --orphans=$PRUNE_ORPHANS --confirm
             env:
             - name: KEEP_COMPLETE
-              value: {{ .Values.keep_complete }}
+              value: "{{ .Values.keep_complete }}"
             - name: KEEP_FAILED
-              value: {{ .Values.keep_failed }}
+              value: "{{ .Values.keep_failed }}"
             - name: KEEP_YOUNGER_THAN
-              value: {{ .Values.keep_younger_than }}
+              value: "{{ .Values.keep_younger_than }}"
             - name: PRUNE_ORPHANS
-              value: {{ .Values.prune_orphans }}
+              value: "{{ .Values.prune_orphans }}"
             image: {{ .Values.image }}:{{ .Values.image_tag }}
             name: {{ .Values.job_name }}-{{ .Values.prune_type }}
           dnsPolicy: ClusterFirst

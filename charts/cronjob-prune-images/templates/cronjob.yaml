@@ -20,9 +20,9 @@ spec:
               --keep-younger-than=$IMAGE_PRUNE_KEEP_YOUNGER_THAN --confirm
             env:
             - name: IMAGE_PRUNE_KEEP_TAG_REVISIONS
-              value: {{ .Values.image_prune_keep_tag_revisions }}
+              value: "{{ .Values.image_prune_keep_tag_revisions }}"
             - name: IMAGE_PRUNE_KEEP_YOUNGER_THAN
-              value: {{ .Values.image_prune_keep_younger_than }}
+              value: "{{ .Values.image_prune_keep_younger_than }}"
             image: {{ .Values.image }}:{{ .Values.image_tag }}
             name: {{ .Values.job_name }}
           dnsPolicy: ClusterFirst
