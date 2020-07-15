@@ -3,7 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     template: cronjob-aws-ocp-snap
-  name: system:pvc-reader
+  name: {{ .Values.namespace }}-pvc-reader
 roleRef:
   name: pvc-reader
 subjects:

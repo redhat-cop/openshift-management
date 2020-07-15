@@ -3,7 +3,7 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     template: cronjob-prune-builds-deployments
-  name: system:build-pruners
+  name: {{ .Values.namespace }}-build-pruners
 roleRef:
   name: cluster-admin
 subjects:
