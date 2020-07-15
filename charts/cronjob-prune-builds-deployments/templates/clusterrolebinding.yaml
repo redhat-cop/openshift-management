@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: authorization.openshift.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
