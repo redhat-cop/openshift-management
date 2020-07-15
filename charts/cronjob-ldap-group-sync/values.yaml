@@ -16,6 +16,6 @@ ldap_url: '# TODO: must define a default value for .ldap_url'
 ldap_user_name_attributes: '["uid"]'
 ldap_user_uid_attribute: dn
 ldap_users_search_base: cn=users,cn=accounts,dc=myorg,dc=example,dc=com
-namespace: openshift-cluster-ops
+namespace: cluster-ops
 schedule: '@hourly'
 success_jobs_history_limit: "5"
