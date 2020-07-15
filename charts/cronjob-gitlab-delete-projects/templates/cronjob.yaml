@@ -22,7 +22,7 @@ spec:
             - name: DRY_RUN
               value: "{{ .Values.env.dryRun }}"
             - name: GITLAB_API_URL
-              value: {{ .Values.env.gitlabApiUrl }}
+              value: "{{ .Values.env.gitlabApiUrl }}"
             - name: PARENT_GROUP_ID
               value: "{{ .Values.env.parentGroupId }}"
             - name: NOTIFICATION_URL

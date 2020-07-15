@@ -19,11 +19,11 @@ spec:
             - /usr/local/bin/prune-ocp-projects.sh
             env:
             - name: PROJECT_EXCLUDE_USER
-              value: {{ .Values.project_exclude_user }}
+              value: "{{ .Values.project_exclude_user }}"
             - name: PROJECT_EXCLUDE_SYSTEM
-              value: {{ .Values.namespace }} {{ .Values.project_exclude_system }}
+              value: "{{ .Values.namespace }} {{ .Values.project_exclude_system }}"
             - name: TIMESTAMP_HOURS_AGO
-              value: {{ .Values.timestamp_hours_ago }}
+              value: "{{ .Values.timestamp_hours_ago }}"
             image: {{ .Values.name }}:{{ .Values.tag }}
             name: {{ .Values.job_name }}
           dnsPolicy: ClusterFirst
