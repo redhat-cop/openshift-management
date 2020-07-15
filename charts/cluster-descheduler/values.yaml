@@ -8,7 +8,7 @@ max_pods: "0"
 min_cpu: "0"
 min_mem: "0"
 min_pods: "0"
-namespace: kube-system
+namespace: cluster-ops
 node_threshold: "0"
 remove_dups: "False"
 schedule: '@hourly'

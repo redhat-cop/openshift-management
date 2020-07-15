@@ -4,7 +4,7 @@ failed_jobs_history_limit: "5"
 job_name: cronjob-prune-projects
 job_service_account: pruner
 name: prune-ocp-projects
-namespace: cluster-maintenance
+namespace: cluster-ops
 project_exclude_system: default kube-public kube-service-catalog kube-system management-infra
   openshift openshift-ansible-service-broker openshift-infra openshift-logging openshift-node
   openshift-sdn openshift-template-service-broker openshift-web-console openshift-console
