@@ -30,5 +30,5 @@ spec:
           serviceAccount: {{ .Values.job_service_account }}
           serviceAccountName: {{ .Values.job_service_account }}
           terminationGracePeriodSeconds: 30
-  schedule: {{ .Values.schedule }}
+  schedule: "{{ .Values.schedule }}"
   successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}
