@@ -4,45 +4,6 @@ kind: Template
 metadata:
   name: cronjob-prune-projects
 objects:
-- kind: ImageStream
-  apiVersion: v1
-  metadata:
-    annotations:
-      description: Keeps track of changes in the application image
-    name: ${NAME}
-    labels:
-      template: cronjob-prune-projects
-  spec:
-    lookupPolicy:
-      local: true
-- kind: BuildConfig
-  apiVersion: v1
-  metadata:
-    annotations:
-      description: Defines how to build the application
-    name: ${NAME}
-    labels:
-      template: cronjob-prune-projects
-  spec:
-    completionDeadlineSeconds: 1800
-    output:
-      to:
-        kind: ImageStreamTag
-        name: ${NAME}:${TAG}
-    runPolicy: Serial
-    source:
-      git:
-        uri: "${SOURCE_REPOSITORY_URL}"
-        ref: "${SOURCE_REPOSITORY_REF}"
-      contextDir: "${CONTEXT_DIR}"
-    strategy:
-      dockerStrategy:
-        from:
-          kind: DockerImage
-          name: "${BASE_IMAGE}"
-      type: Docker
-    triggers:
-    - type: ConfigChange
 - kind: CronJob
   apiVersion: batch/v1beta1
   metadata:
@@ -60,7 +21,7 @@ objects:
           spec:
             containers:
             - name: "${JOB_NAME}"
-              image: "${NAME}:${TAG}"
+              image: "${IMAGE_PROJECT_PRUNER}:${TAG}"
               command:
                 - "/bin/bash"
                 - "-c"
@@ -132,7 +93,7 @@ parameters:
 - name: PROJECT_EXCLUDE_SYSTEM
   displayName: System projects to exclude from the Prune Job
   description: System projects that should not be deleted
-  value: default kube-public kube-service-catalog kube-system management-infra openshift openshift-ansible-service-broker openshift-infra openshift-logging openshift-node openshift-sdn openshift-template-service-broker openshift-web-console openshift-console openshift-metrics-server openshift-monitoring openshift-apiserver openshift-apiserver-operator openshift-authentication openshift-authentication-operator openshift-cluster-machine-approver openshift-cluster-node-tuning-operator openshift-cluster-samples-operator openshift-cluster-storage-operator openshift-cluster-version openshift-config openshift-config-managed openshift-console-operator openshift-controller-manager openshift-controller-manager-operator openshift-dns openshift-dns-operator openshift-etcd openshift-image-registry openshift-infra openshift-ingress openshift-ingress-operator openshift-kube-apiserver openshift-kube-apiserver-operator openshift-kube-controller-manager openshift-kube-controller-manager-operator openshift-kube-scheduler openshift-kube-scheduler-operator openshift-machine-api openshift-machine-config-operator openshift-marketplace openshift-multus openshift-network-operator openshift-node openshift-operator-lifecycle-manager openshift-operators openshift-sdn openshift-service-ca openshift-service-ca-operator openshift-service-catalog-apiserver-operator openshift-service-catalog-controller-manager-operator
+  value: default kube-public kube-service-catalog kube-system management-infra openshift openshift-ansible-service-broker openshift-infra openshift-logging openshift-node openshift-sdn openshift-template-service-broker openshift-web-console openshift-console openshift-metrics-server openshift-monitoring openshift-apiserver openshift-apiserver-operator openshift-authentication openshift-authentication-operator openshift-cluster-machine-approver openshift-cluster-node-tuning-operator openshift-cluster-samples-operator openshift-cluster-storage-operator openshift-cluster-version openshift-config openshift-config-managed openshift-console-operator openshift-controller-manager openshift-controller-manager-operator openshift-dns openshift-dns-operator openshift-etcd openshift-image-registry openshift-infra openshift-ingress openshift-ingress-operator openshift-kube-apiserver openshift-kube-apiserver-operator openshift-kube-controller-manager openshift-kube-controller-manager-operator openshift-kube-scheduler openshift-kube-scheduler-operator openshift-machine-api openshift-machine-config-operator openshift-marketplace openshift-multus openshift-network-operator openshift-node openshift-operator-lifecycle-manager openshift-operators openshift-sdn openshift-service-ca openshift-service-ca-operator openshift-service-catalog-apiserver-operator openshift-service-catalog-controller-manager-operator openshift-service-catalog-removed openshift-kube-storage-version-migrator-operator openshift-pipelines openshift-etcd-operator openshift-insights openshift-operators-redhat openshift-kni-infra openshift-kube-storage-version-migrator openshift-user-workload-monitoring openshift-ovirt-infra openshift-config-operator openshift-vsphere-infra openshift-cloud-credential-operator kube-node-lease openshift-openstack-infra
   required: true
 - name: PROJECT_EXCLUDE_USER
   displayName: User defined projects to exclude from the Prune Job
@@ -148,20 +109,11 @@ parameters:
   description: "Name of the Service Account To Execute the Job As."
   value: "pruner"
   required: true
-- description: Git branch/tag reference
-  name: SOURCE_REPOSITORY_REF
-  value: master
-- description: Git source URL for application
-  name: SOURCE_REPOSITORY_URL
+- description: The Image name
+  displayName: Image Name
+  name: IMAGE_PROJECT_PRUNER
   required: true
-  value: https://github.com/redhat-cop/openshift-management
-- description: Path within Git repository to build; empty for root of repository
-  name: CONTEXT_DIR
-  value: "images/prune-ocp-projects"
-- description: Base image for the buils
-  name: BASE_IMAGE
-  required: true
-  value: "centos:7"
+  value: quay.io/redhat-cop/prune-ocp-projects
 - description: The tag for the iamge
   displayName: Image Tag
   name: TAG
