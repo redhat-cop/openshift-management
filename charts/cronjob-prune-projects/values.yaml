@@ -5,7 +5,7 @@ job_name: cronjob-prune-projects
 job_service_account: pruner
 name: prune-ocp-projects
 namespace: cluster-ops
-project_exclude_system: management-infra istio-system cluster-ops
+project_exclude_system: cluster-ops
 project_exclude_user: '# TODO: must define a default value for .project_exclude_user'
 schedule: '@hourly'
 source_repository_ref: master
