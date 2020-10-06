@@ -5,21 +5,7 @@ job_name: cronjob-prune-projects
 job_service_account: pruner
 name: prune-ocp-projects
 namespace: cluster-ops
-project_exclude_system: default kube-public kube-service-catalog kube-system management-infra
-  openshift openshift-ansible-service-broker openshift-infra openshift-logging openshift-node
-  openshift-sdn openshift-template-service-broker openshift-web-console openshift-console
-  openshift-metrics-server openshift-monitoring openshift-apiserver openshift-apiserver-operator
-  openshift-authentication openshift-authentication-operator openshift-cluster-machine-approver
-  openshift-cluster-node-tuning-operator openshift-cluster-samples-operator openshift-cluster-storage-operator
-  openshift-cluster-version openshift-config openshift-config-managed openshift-console-operator
-  openshift-controller-manager openshift-controller-manager-operator openshift-dns
-  openshift-dns-operator openshift-etcd openshift-image-registry openshift-infra openshift-ingress
-  openshift-ingress-operator openshift-kube-apiserver openshift-kube-apiserver-operator
-  openshift-kube-controller-manager openshift-kube-controller-manager-operator openshift-kube-scheduler
-  openshift-kube-scheduler-operator openshift-machine-api openshift-machine-config-operator
-  openshift-marketplace openshift-multus openshift-network-operator openshift-node
-  openshift-operator-lifecycle-manager openshift-operators openshift-sdn openshift-service-ca
-  openshift-service-ca-operator openshift-service-catalog-apiserver-operator openshift-service-catalog-controller-manager-operator
+project_exclude_system: cluster-ops
 project_exclude_user: '# TODO: must define a default value for .project_exclude_user'
 schedule: '@hourly'
 source_repository_ref: master

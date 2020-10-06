@@ -24,6 +24,15 @@ do
 done
 
 # Eliminate the "System projects"
+for project in "${!projects[@]}";
+do
+  if [[ "$project" == "openshift"*  || "$project" == "kube"* || "$project" == "default" ]];
+  then
+    unset projects["${project}"]
+  fi
+done
+
+# Eliminate the "User-System projects"
 if [ -n "${PROJECT_EXCLUDE_SYSTEM}" ];
 then
   for project in ${PROJECT_EXCLUDE_SYSTEM};
