@@ -2,7 +2,7 @@ base_image: centos:7
 context_dir: images/prune-ocp-projects
 failed_jobs_history_limit: "5"
 job_name: cronjob-prune-projects
-job_service_account: pruner
+job_service_account: project-pruner
 name: prune-ocp-projects
 namespace: cluster-ops
 project_exclude_system: cluster-ops
