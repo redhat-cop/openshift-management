@@ -6,5 +6,5 @@ image_tag: 4.4
 job_name: cronjob-prune-images
 job_service_account: image-pruner
 namespace: cluster-ops
-schedule: 0 0 * * *
+schedule: "0 0 * * *"
 success_jobs_history_limit: "5"

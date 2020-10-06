@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: build.openshift.io/v1
 kind: BuildConfig
 metadata:
   annotations:
@@ -7,7 +7,7 @@ metadata:
     template: cronjob-aws-ocp-snap
   name: {{ .Values.name }}
 spec:
-  completionDeadlineSeconds: "1800"
+  completionDeadlineSeconds: 1800
   output:
     to:
       kind: ImageStreamTag
@@ -17,6 +17,7 @@ spec:
     contextDir: /images/cronjob-aws-ocp-snap
     git:
       uri: https://github.com/redhat-cop/openshift-management.git
+    type: Git
   strategy:
     dockerStrategy:
       from:

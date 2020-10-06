@@ -34,5 +34,5 @@ spec:
           serviceAccount: {{ .Values.prune_type }}-{{ .Values.job_service_account }}
           serviceAccountName: {{ .Values.prune_type }}-{{ .Values.job_service_account }}
           terminationGracePeriodSeconds: 30
-  schedule: {{ .Values.schedule }}
+  schedule: "{{ .Values.schedule }}"
   successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

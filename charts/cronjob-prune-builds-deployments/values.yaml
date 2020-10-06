@@ -8,6 +8,6 @@ keep_failed: "1"
 keep_younger_than: 60m
 namespace: cluster-ops
 prune_orphans: "true"
-prune_type: '# TODO: must define a default value for .prune_type'
+prune_type: builds
 schedule: 0 0 * * *
 success_jobs_history_limit: "5"
