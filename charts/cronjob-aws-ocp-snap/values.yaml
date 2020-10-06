@@ -6,7 +6,7 @@ job_name: cronjob-ebs-snaphost
 job_service_account: ebs-snap-creator
 name: cronjob-aws-ocp-snap
 namespace: cluster-ops
-nspace: changeme
+nspace: PLEASE_CHANGE_ME_WITH_VALID_VALUE
 schedule: '@daily'
 success_jobs_history_limit: "5"
 vol: changeme
