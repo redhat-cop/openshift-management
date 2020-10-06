@@ -1,6 +1,6 @@
-aws_access_key_id: changeme
-aws_region: changme
-aws_secret_access_key: changeme
+aws_access_key_id: PLEASE_CHANGE_ME_WITH_VALID_VALUE
+aws_region: PLEASE_CHANGE_ME_WITH_VALID_VALUE
+aws_secret_access_key: PLEASE_CHANGE_ME_WITH_VALID_VALUE
 failed_jobs_history_limit: "5"
 job_name: cronjob-ebs-snaphost
 job_service_account: ebs-snap-creator
@@ -9,4 +9,4 @@ namespace: cluster-ops
 nspace: PLEASE_CHANGE_ME_WITH_VALID_VALUE
 schedule: '@daily'
 success_jobs_history_limit: "5"
-vol: changeme
+vol: PLEASE_CHANGE_ME_WITH_VALID_VALUE
