@@ -1,23 +1,13 @@
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: authorization.openshift.io/v1
+kind: ClusterRoleBinding
 metadata:
   labels:
     template: cronjob-prune-tekton-pipelinerun
-  name: tekton-cleaner
-rules:
-  - apiGroups: ["tekton.dev"]
-    resources: ["pipelineruns"]
-    verbs: ["delete", "get", "watch", "list"]
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: cleaner-to-cleaner
+  name: {{ .Values.namespace }}-tekton-pipelinerun-pruners
 roleRef:
-  kind: Role
-  name: tekton-cleaner
-  apiGroup: rbac.authorization.k8s.io
+  name: cluster-admin
 subjects:
-  - kind: ServiceAccount
-    name: {{ .Values.job_service_account }}
+- kind: ServiceAccount
+  name: {{ .Values.job_service_account }}
+userNames:
+- system:serviceaccount:{{ .Values.namespace }}:{{ .Values.job_service_account }}
