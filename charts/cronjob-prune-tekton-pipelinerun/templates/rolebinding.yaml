@@ -1,0 +1,23 @@
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    template: cronjob-prune-tekton-pipelinerun
+  name: tekton-cleaner
+rules:
+  - apiGroups: ["tekton.dev"]
+    resources: ["pipelineruns"]
+    verbs: ["delete", "get", "watch", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cleaner-to-cleaner
+roleRef:
+  kind: Role
+  name: tekton-cleaner
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.job_service_account }}

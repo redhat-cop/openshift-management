@@ -1,0 +1,7 @@
+namespace: labs-ci-cd
+job_name: cronjob-prune-tekton-pipelinerun
+job_service_account: tekton-pruner
+num_to_keep: "1"
+failed_jobs_history_limit: "5"
+schedule: "*/3 * * * *"
+success_jobs_history_limit: "5"

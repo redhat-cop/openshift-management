@@ -1,0 +1,4 @@
+description: Scheduled task to prune pipelinerun from tekton
+name: cronjob-prune-tekton-pipelinerun
+tags: management,cronjob,prune,tekton,pipelinerun
+version: v0.0.1
