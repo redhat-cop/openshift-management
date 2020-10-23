@@ -8,6 +8,6 @@ roleRef:
   name: cluster-admin
 subjects:
 - kind: ServiceAccount
-  name: {{ .Values.job_service_account }}
+  name: {{ .Values.prune_type }}-{{ .Values.job_service_account }}
 userNames:
 - system:serviceaccount:{{ .Values.namespace }}:{{ .Values.prune_type }}-{{ .Values.job_service_account }}
