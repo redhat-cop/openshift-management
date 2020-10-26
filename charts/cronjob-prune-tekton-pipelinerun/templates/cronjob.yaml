@@ -1,0 +1,32 @@
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    template: cronjob-prune-tekton-pipelinerun
+  name: {{ .Values.job_name }}
+spec:
+  schedule: "{{ .Values.schedule }}"
+  successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          serviceAccount: cleaner
+          containers:
+            - name: kubectl
+              image: {{ .Values.image }}:{{ .Values.image_tag }}
+              env:
+                - name: NUM_TO_KEEP
+                  value: "{{ .Values.num_to_keep }}"
+              command:
+                - /bin/bash
+                - -c
+                - |
+                    TO_DELETE="$(kubectl get pipelinerun -o jsonpath='{range .items[?(@.status.completionTime)]}{.status.completionTime}{" "}{.metadata.name}{"\n"}{end}' | sort | head -n -${NUM_TO_KEEP} | awk '{ print $2}')"
+                    test -n "$TO_DELETE" && kubectl delete pipelinerun ${TO_DELETE} || true
+          serviceAccount: {{ .Values.job_service_account }}
+          serviceAccountName: {{ .Values.job_service_account }}
+          terminationGracePeriodSeconds: 60
