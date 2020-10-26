@@ -17,7 +17,7 @@ spec:
           serviceAccount: cleaner
           containers:
             - name: kubectl
-              image: ghcr.io/ctron/kubectl:latest
+              image: {{ .Values.image }}:{{ .Values.image_tag }}
               env:
                 - name: NUM_TO_KEEP
                   value: "{{ .Values.num_to_keep }}"
