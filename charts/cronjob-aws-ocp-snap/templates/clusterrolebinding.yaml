@@ -1,13 +1,14 @@
-apiVersion: authorization.openshift.io/v1
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   labels:
     template: cronjob-aws-ocp-snap
   name: {{ .Values.namespace }}-pvc-reader
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   name: pvc-reader
+  kind: ClusterRole
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.job_service_account }}
-userNames:
-- system:serviceaccount:{{ .Values.namespace }}:{{ .Values.job_service_account }}
+  namespace: {{ .Values.namespace }}

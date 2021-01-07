@@ -1,4 +1,4 @@
-apiVersion: authorization.openshift.io/v1
+apiVersion: rbac.authorization.k8s.io/v1
 groupNames: null
 kind: ClusterRoleBinding
 metadata:
@@ -6,9 +6,10 @@ metadata:
     template: cronjob-ldap-group-sync-secure
   name: {{ .Values.namespace }}-ldap-group-syncers
 roleRef:
+  apiGroup: rbac.authorization.k8s.io
   name: ldap-group-syncer
+  kind: ClusterRole
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.job_service_account }}
-userNames:
-- system:serviceaccount:{{ .Values.namespace }}:{{ .Values.job_service_account }}
+  namespace: {{ .Values.namespace }}

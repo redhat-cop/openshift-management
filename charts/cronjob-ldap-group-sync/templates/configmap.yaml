@@ -27,7 +27,7 @@ data:
       userUIDAttribute: "{{ .Values.ldap_user_uid_attribute }}"
       tolerateMemberNotFoundErrors: true
       tolerateMemberOutOfScopeErrors: true
-  whitelist.txt: {{ .Values.ldap_groups_whitelist }}
+  whitelist.txt: {{ .Values.ldap_groups_whitelist | quote }}
 kind: ConfigMap
 metadata:
   labels:
