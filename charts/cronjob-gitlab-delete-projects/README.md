@@ -69,4 +69,4 @@ The following variables maybe configured.
 | `env.secret.personalAccessToken`  | secret | The personal access token for the user accessing gitlab. Bot recommended |
 | `env.parentGroupId`  | cronjob | Group ID of the GitLab (sub)group to look for projects to delete. |
 | `env.secret.notificationToken` | secret | The access token for the notification application |
-| `env.notificationUrl` | cronjob | The url to notify when a delete has occurred | 
+| `env.notificationUrl` | cronjob | The url to notify when a delete has occurred. Disabled during a dry run unless the token is set to `DRYRUN` | 
