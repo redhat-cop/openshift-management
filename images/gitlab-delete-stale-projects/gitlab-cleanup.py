@@ -178,8 +178,13 @@ def notifyGroup(group_id):
     notify(None, group_id)
 
 def notify(project, group_id):
-    if notification_url is None or notification_token is None:
+    
+    if not notification_url or not notification_token:
         logger.debug("Notifications not configured")
+        return False
+
+    if dry_run and notification_token != 'DRYRUN':
+        logger.debug('Notification not sent during dry run. Set token to DRYRUN to enable dry run notifications');
         return False
     
     try:
