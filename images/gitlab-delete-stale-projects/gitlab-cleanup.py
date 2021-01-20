@@ -35,6 +35,9 @@ def check_env_vars():
     if not delete_after_hours_string.isnumeric():
         raise ValueError('You must set a time period to delete projects (DELETE_AFTER_HOURS)')
 
+    logger.info(f"Notification URL {notification_url}")
+    logger.info(f"Notification Token {notification_token.translate('*'*256)}")
+
 # clean groups and projects at our below this level of the group hierarchy
 # uses a staleness time measure to decide whether to delete
 # if a group has no projects or subgroups it should also be deleted
@@ -114,14 +117,14 @@ def delete_group(group_id, group_name):
             headers={"PRIVATE-TOKEN": git_token},
         )
 
-        if response.status_code == 202:
-            logger.warn(f"deleted group {group_id}")
-            return True
+        if response.status_code != 202:
+            logger.error(f"Failed to delete group {group_id} code {response.status}")
+            return False;
 
-        logger.error(f"Failed to delete group {group_id} code {response.status}")
+        logger.warn(f"deleted group {group_id}")
 
     notifyGroup(group_id)
-    return False
+    return True;
 # end delete_group
 
 def delete_project(project):
@@ -134,14 +137,14 @@ def delete_project(project):
             headers={"PRIVATE-TOKEN": git_token},
         )
 
-        if response.status_code == 202:
-            logger.warn(f"deleted project {project_id} { project['name']} ")
-            return True
-
-        logger.error(f"Failed to delete project {project_id} { project['name']}  code {response.status}")
+        if response.status_code != 202:
+            logger.error(f"Failed to delete project {project_id} { project['name']}  code {response.status}")
+            return False;
+            
+        logger.warn(f"deleted project {project_id} { project['name']} ")
 
     notifyProject(project)
-    return False
+    return True
 #end delete_project
 
 # a job is considered stale if the amount of time that has occurred since its last activity is greater than the threshold amount of hours set in the env
@@ -179,10 +182,14 @@ def notify(project, group_id):
         logger.debug("Notifications not configured")
         return False
     
-    requests.post(
-        notification_url, headers={"x-notification-token": notification_token, 'Content-type': 'application/json'},
-        json={"event_name": "project_deleted" if project is not None else "group_deleted", "project": project, "group_id": group_id}
-    )
+    try:
+        resp = requests.post(
+            notification_url, headers={"x-notification-token": notification_token, 'Content-type': 'application/json'},
+            json={"event_name": "project_deleted" if project is not None else "group_deleted", "project": project, "group_id": group_id}
+        )
+        logger.info(f"Notification status_code {resp.status_code}");
+    except: 
+        logger.error(f"Notification error smothered {notification_url}")
 
 check_env_vars()
 
