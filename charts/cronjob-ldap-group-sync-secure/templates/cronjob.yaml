@@ -44,5 +44,5 @@ spec:
           - name: ldap-bind-password
             secret:
               secretName: {{ .Values.ldap_bind_password_secret }}
-  schedule: {{ .Values.schedule }}
+  schedule: "{{ .Values.schedule }}"
   successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}
