@@ -6,7 +6,7 @@ metadata:
     template: cronjob-prune-tekton-pipelinerun
   name: {{ .Values.job_name }}
 spec:
-  schedule: "{{ .Values.schedule }}"
+  schedule: {{ .Values.schedule | quote }}
   successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}
   concurrencyPolicy: Forbid
   jobTemplate:
@@ -19,14 +19,22 @@ spec:
             - name: kubectl
               image: {{ .Values.image }}:{{ .Values.image_tag }}
               env:
+                - name: PIPELINES
+                  value: {{ .Values.pipelines | quote }}
                 - name: NUM_TO_KEEP
-                  value: "{{ .Values.num_to_keep }}"
+                  value: {{ .Values.num_to_keep | quote }}
               command:
                 - /bin/bash
                 - -c
                 - |
-                    TO_DELETE="$(kubectl get pipelinerun -o jsonpath='{range .items[?(@.status.completionTime)]}{.status.completionTime}{" "}{.metadata.name}{"\n"}{end}' | sort | head -n -${NUM_TO_KEEP} | awk '{ print $2}')"
-                    test -n "$TO_DELETE" && kubectl delete pipelinerun ${TO_DELETE} || true
+                    PIPELINES=${PIPELINES:-$(kubectl get pipeline -A -ojsonpath='{range .items[*]}{.metadata.namespace}{"/"}{.metadata.name}{"\n"}{end}'|grep -vE '^default|^kube|^openshift')}
+                    for pipeline in $PIPELINES
+                    do
+                      NS=$(echo $pipeline | awk -F/ '{print $1}')
+                      PL_LABEL=$(echo $pipeline | awk -F/ '{print $2}')
+                      TO_DELETE=$(kubectl get pipelinerun -n $NS -l tekton.dev/pipeline=$PL_LABEL --ignore-not-found -o jsonpath='{range .items[?(@.status.completionTime)]}{.status.completionTime}{" "}{.metadata.namespace}{"/"}{.metadata.name}{"\n"}{end}' | sort | head -n -${NUM_TO_KEEP} | awk -F/ '{print $2}')
+                      test -n "$TO_DELETE" && kubectl delete pipelinerun ${TO_DELETE} -n ${NS} || true
+                    done
           serviceAccount: {{ .Values.job_service_account }}
           serviceAccountName: {{ .Values.job_service_account }}
           terminationGracePeriodSeconds: 60

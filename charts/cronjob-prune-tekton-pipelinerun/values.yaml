@@ -1,9 +1,10 @@
 namespace: labs-ci-cd
 job_name: cronjob-prune-tekton-pipelinerun
 job_service_account: tekton-pruner
+pipelines: ''
 num_to_keep: "10"
 failed_jobs_history_limit: "5"
 schedule: "*/30 * * * *"
 success_jobs_history_limit: "5"
 image: quay.io/openshift/origin-cli
-image_tag: 4.5
+image_tag: 4.7
