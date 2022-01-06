@@ -14,7 +14,7 @@ objects:
 - kind: "ConfigMap"
   apiVersion: "v1"
   metadata:
-    name: "ldap-config"
+    name: "${LDAP_CONFIG}"
     namespace: "${NAMESPACE}"
     labels:
       template: "cronjob-ldap-group-sync"
@@ -92,7 +92,7 @@ objects:
             volumes:
               - name: "ldap-sync-volume"
                 configMap:
-                  name: "ldap-config"
+                  name: "${LDAP_CONFIG}"
               - name: "ldap-bind-password"
                 secret:
                   secretName: "${LDAP_BIND_PASSWORD_SECRET}"
@@ -247,7 +247,12 @@ parameters:
     description: "Image Tag to use for the container."
     required: true
     value: "v3.11"
-  - name: STARTING_DEADLINE_SECONDS
-    description: Set the startingDeadlineSeconds for the cronjob
+  - name: "STARTING_DEADLINE_SECONDS"
+    description: "Set the startingDeadlineSeconds for the cronjob"
     required: false
     value: "60"
+  - name: "LDAP_CONFIG"
+    displayName: "LDAP Config"
+    description: "The name for the ConfigMap in which to store the LDAP Configuration"
+    value: "ldap-config"
+    required: true
