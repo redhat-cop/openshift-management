@@ -1,0 +1,18 @@
+---
+# NOTE: To be able to run the ETCD backup commands need to be able to sudo,
+#       hence the need for privileged.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "cronjob-etcd-backup.fullname" . }}
+  labels:
+    {{- include "cronjob-etcd-backup.labels" . | nindent 4 }}
+rules:
+  - verbs:
+      - use
+    apiGroups:
+      - security.openshift.io
+    resources:
+      - securitycontextconstraints
+    resourceNames:
+      - privileged

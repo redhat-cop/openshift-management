@@ -1,0 +1,59 @@
+
+{{- define "cronjob-etcd-backup.helmTestCronJobServiceAccountName" -}}
+{{- printf "helm-test-cronjob-%s" (include "cronjob-etcd-backup.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "cronjob-etcd-backup.fullname" . }}-test-cronjob"
+  labels:
+    {{- include "cronjob-etcd-backup.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  serviceAccountName: {{ include "cronjob-etcd-backup.helmTestCronJobServiceAccountName" . }}
+  automountServiceAccountToken: true
+  containers:
+  - name: wget
+    image: registry.redhat.io/openshift4/ose-cli
+    command:
+    - /bin/bash
+    - -ec
+    - |
+      NAMESPACE="{{ .Release.Namespace }}"
+      CRONJOB_NAME="{{ include "cronjob-etcd-backup.fullname" . }}"
+      JOB_NAME="test-${CRONJOB_NAME}-{{ .Release.Revision }}"
+      TEST_TIMEOUT="{{ .Values.testCronJobTimeout }}"
+
+      echo "Create Test Job from CronJob"
+      oc create job ${JOB_NAME} --from=cronjob/${CRONJOB_NAME} --namespace ${NAMESPACE}
+
+      echo "Wait for Test Job to complete successfully"
+      oc wait --for=condition=complete job/${JOB_NAME} --namespace ${NAMESPACE} --timeout ${TEST_TIMEOUT}
+  restartPolicy: Never
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "cronjob-etcd-backup.helmTestCronJobServiceAccountName" . }}
+  labels:
+    {{- include "cronjob-etcd-backup.labels" . | nindent 4 }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "cronjob-etcd-backup.helmTestCronJobServiceAccountName" . }}
+  labels:
+    {{- include "cronjob-etcd-backup.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: edit
+subjects:
+- kind: ServiceAccount
+  name: {{ include "cronjob-etcd-backup.helmTestCronJobServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
