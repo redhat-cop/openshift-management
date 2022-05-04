@@ -1,0 +1,14 @@
+---
+partOf: cluster-operations
+
+pvcStorage: 100Gi
+pvcStorageClassName:
+
+cronJobSchedule: '5 0 * * *'
+cronJobSuccessfulJobsHistoryLimit: 5
+cronJobFailedJobsHistoryLimit: 5
+cronJobImage: registry.redhat.io/openshift4/ose-cli
+
+cronJobDaysToKeepPersistentETCDBackups: 5
+
+testCronJobTimeout: 120s

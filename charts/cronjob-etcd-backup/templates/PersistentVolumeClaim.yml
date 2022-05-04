@@ -1,0 +1,17 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "cronjob-etcd-backup.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cronjob-etcd-backup.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.pvcStorage }}
+{{ if .Values.pvcStorageClassName }}
+  storageClassName: {{ .Values.pvcStorageClassName }}
+{{ end }}

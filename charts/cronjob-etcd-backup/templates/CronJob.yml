@@ -1,0 +1,83 @@
+---
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "cronjob-etcd-backup.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "cronjob-etcd-backup.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.cronJobSchedule }}"
+  concurrencyPolicy: Forbid
+  suspend: false
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "cronjob-etcd-backup.labels" . | nindent 8 }}
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            {{- include "cronjob-etcd-backup.labels" . | nindent 12 }}
+        spec:
+          nodeSelector:
+            node-role.kubernetes.io/master: ''
+          restartPolicy: Never
+          activeDeadlineSeconds: 500
+          serviceAccountName: {{ include "cronjob-etcd-backup.fullname" . }}
+          hostPID: true
+          hostNetwork: true
+          enableServiceLinks: true
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 30
+          securityContext: {}
+          containers:
+            - resources: {}
+              terminationMessagePath: /dev/termination-log
+              name: {{ include "cronjob-etcd-backup.fullname" . }}
+              command:
+              - /bin/bash
+              - '-c'
+              - >-
+                echo -e '\n\n---\nCreate etcd backup local to master\n' &&
+                chroot /host /usr/local/bin/cluster-backup.sh /home/core/backup/ &&
+                echo -e '\n\n---\nCleanup old local etcd backups\n' &&
+                chroot /host find /home/core/backup/ -type f -mmin +"2" -delete &&
+                echo -e '\n\n---\nCopy etcd backup to persistent volume\n' &&
+                mkdir -pv /mnt/backup/$(date "+%F_%H%M%S") &&
+                cp -v /host/home/core/backup/* /mnt/backup/$(date "+%F_%H%M%S") &&
+                echo -e "\n\n---\nDelete persistent ETCD backups older then ${DAYS_TO_KEEP_PERSISTENT_ETCD_BACKUPS} days\n" &&
+                find /mnt/backup/* -type d -mtime +${DAYS_TO_KEEP_PERSISTENT_ETCD_BACKUPS} -exec rm -rv {} \; &&
+                echo -e '\n\n---\nList all etc backups\n' &&
+                ls -al /mnt/backup/*
+              env:
+              - name: DAYS_TO_KEEP_PERSISTENT_ETCD_BACKUPS
+                value: "{{ .Values.cronJobDaysToKeepPersistentETCDBackups }}"
+              securityContext:
+                privileged: true
+                runAsUser: 0
+                capabilities:
+                  add:
+                    - SYS_CHROOT
+              imagePullPolicy: Always
+              volumeMounts:
+                - name: backup
+                  mountPath: /mnt/backup
+                - name: host
+                  mountPath: /host
+              terminationMessagePolicy: File
+              image: {{ .Values.cronJobImage }}
+          volumes:
+          - name: backup
+            persistentVolumeClaim:
+              claimName: {{ include "cronjob-etcd-backup.fullname" . }}
+          - name: host
+            hostPath:
+              path: /
+              type: Directory
+          dnsPolicy: ClusterFirst
+          tolerations:
+          - key: node-role.kubernetes.io/master
+  successfulJobsHistoryLimit: {{ .Values.cronJobSuccessfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronJobFailedJobsHistoryLimit }}
