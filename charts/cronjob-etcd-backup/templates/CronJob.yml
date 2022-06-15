@@ -48,7 +48,7 @@ spec:
                 mkdir -pv /mnt/backup/$(date "+%F_%H%M%S") &&
                 cp -v /host/home/core/backup/* /mnt/backup/$(date "+%F_%H%M%S") &&
                 echo -e "\n\n---\nDelete persistent ETCD backups older then ${DAYS_TO_KEEP_PERSISTENT_ETCD_BACKUPS} days\n" &&
-                find /mnt/backup/* -type d -mtime +${DAYS_TO_KEEP_PERSISTENT_ETCD_BACKUPS} -exec rm -rv {} \; &&
+                find /mnt/backup/ -mindepth 1 -maxdepth 1 -type d -mtime +${DAYS_TO_KEEP_PERSISTENT_ETCD_BACKUPS} -exec rm -rv {} \; &&
                 echo -e '\n\n---\nList all etc backups\n' &&
                 ls -al /mnt/backup/*
               env:
