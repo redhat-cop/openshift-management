@@ -1,0 +1,39 @@
+name: Release Charts
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+      - 'README.md'
+
+jobs:
+  release:
+    concurrency: staging_environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v2.1
+        with:
+          version: latest 
+
+      - name: Add dependency chart repos
+        run: |
+          helm repo add stable https://charts.helm.sh/stable
+          helm repo add incubator https://charts.helm.sh/incubator
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.4.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
