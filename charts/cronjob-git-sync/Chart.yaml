@@ -2,6 +2,6 @@ apiVersion: v2
 description: Scheduled Task to Perform Git Repo Synchronization
 name: cronjob-git-sync
 tags: management,cronjob,git,sync
-version: 0.0.1
+version: 0.0.2
 maintainers:
 - name: redhat-cop

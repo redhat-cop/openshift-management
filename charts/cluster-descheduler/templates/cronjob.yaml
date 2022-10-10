@@ -1,4 +1,4 @@
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   labels:
@@ -35,5 +35,5 @@ spec:
           - configMap:
               name: descheduler-policy-configmap
             name: policy-volume
-  schedule: {{ .Values.schedule }}
+  schedule: {{ .Values.schedule | quote }}
   successfulJobsHistoryLimit: "1"
