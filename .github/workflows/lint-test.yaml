@@ -2,9 +2,9 @@ name: Lint and Test Charts
 
 on: 
   pull_request:
-    paths-ignore:
-      - '.github/**'
-      - 'README.md'
+    paths:
+      - 'charts/**'
+
 jobs:
   lint-test:
     runs-on: ubuntu-latest
@@ -38,16 +38,3 @@ jobs:
 
       - name: Run chart-testing (lint)
         run: ct lint
-
-      # TODO
-      # These checks invariably fail with openshift specific features, features that need pv/pvc
-      # Need a better strategy here
-      # - name: Create kind cluster
-      #   uses: helm/kind-action@v1.0.0-rc.1
-      #   if: steps.lint.outputs.changed == 'true'
-
-      # - name: Run chart-testing (install)
-      #   uses: helm/chart-testing-action@v2.2.1
-      #   with:
-      #     command: install
-      #     config: ct.yaml

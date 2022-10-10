@@ -2,4 +2,4 @@ description: Descheduler to remove pods violating usage thresholds, affinity vio
   and duplicate pod placements
 name: cluster-descheduler
 tags: management,descheduler
-version: v0.0.1
+version: v0.0.2

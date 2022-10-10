@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - '.github/**'
-      - 'README.md'
+    paths:
+      - 'charts/**'
 
 jobs:
   release:
