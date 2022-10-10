@@ -1,3 +1,4 @@
+apiVersion: v2
 description: Scheduled Task to Perform LDAP Group Synchronization
 name: cronjob-ldap-group-sync
 tags: management,cronjob,ldap,group,sync

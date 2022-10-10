@@ -1,3 +1,4 @@
+apiVersion: v2
 description: Scheduled Task to Prune Images from Internal Docker Registry
 name: cronjob-prune-images
 tags: management,cronjob,prune,images

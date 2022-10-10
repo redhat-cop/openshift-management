@@ -1,3 +1,4 @@
+apiVersion: v2
 description: Scheduled Task to Prune Builds or Deployments
 name: cronjob-prune-builds-deployments
 tags: management,cronjob,prune,builds,deployments
