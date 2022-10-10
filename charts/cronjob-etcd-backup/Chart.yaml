@@ -3,3 +3,5 @@ name: cronjob-etcd-backup
 description: Deploys a CronJob for creating automated backups of ETCD and storing them on a PersistentVolume
 type: application
 version: 1.0.0
+maintainers:
+- name: redhat-cop
