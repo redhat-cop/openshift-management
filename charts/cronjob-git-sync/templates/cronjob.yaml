@@ -1,4 +1,4 @@
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   labels:
@@ -51,5 +51,5 @@ spec:
           - name: secret-volume
             secret:
               secretName: {{ .Values.ssh_key_secret_name }}
-  schedule: {{ .Values.schedule }}
+  schedule: {{ .Values.schedule | quote }}
   successfulJobsHistoryLimit: {{ .Values.success_jobs_history_limit }}

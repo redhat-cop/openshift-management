@@ -1,5 +1,7 @@
-description: Descheduler to remove pods violating usage thresholds, affinity violations
-  and duplicate pod placements
+apiVersion: v2
+description: Descheduler to remove pods violating usage thresholds, affinity violations and duplicate pod placements
 name: cluster-descheduler
 tags: management,descheduler
-version: v0.0.1
+version: 0.0.3
+maintainers:
+- name: redhat-cop
