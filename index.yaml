@@ -1,0 +1,134 @@
+apiVersion: v1
+entries:
+  cluster-descheduler:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:08.599267441Z"
+    description: Descheduler to remove pods violating usage thresholds, affinity violations
+      and duplicate pod placements
+    digest: 0e4c772cbd9c51e193dc3554a7c0b9956e2546ebf60d30bb72301cee241a1314
+    maintainers:
+    - name: redhat-cop
+    name: cluster-descheduler
+    tags: management,descheduler
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cluster-descheduler-0.0.3/cluster-descheduler-0.0.3.tgz
+    version: 0.0.3
+  cronjob-aws-ocp-snap:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:08.745824034Z"
+    digest: 7184b8a39b77b12a90e10ff8ddabd9c36e45ac62a3d5aa894910a4d268c47a62
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-aws-ocp-snap
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-aws-ocp-snap-0.0.2/cronjob-aws-ocp-snap-0.0.2.tgz
+    version: 0.0.2
+  cronjob-etcd-backup:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:08.898826232Z"
+    description: Deploys a CronJob for creating automated backups of ETCD and storing
+      them on a PersistentVolume
+    digest: 3d281b6500144770025720cadd07aaa041b1eb94615700a52f924d0f6baec20c
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-etcd-backup
+    type: application
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-etcd-backup-1.0.1/cronjob-etcd-backup-1.0.1.tgz
+    version: 1.0.1
+  cronjob-git-sync:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:09.073124444Z"
+    description: Scheduled Task to Perform Git Repo Synchronization
+    digest: 460a573b358938b75502d0c7a6ea4cab0668c4da3685e79c3df9ccaa15be36c2
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-git-sync
+    tags: management,cronjob,git,sync
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-git-sync-0.0.2/cronjob-git-sync-0.0.2.tgz
+    version: 0.0.2
+  cronjob-ldap-group-sync:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:09.220229738Z"
+    description: Scheduled Task to Perform LDAP Group Synchronization
+    digest: 4171359cca1d55e4e31595474f17efd13f2d7ceae47c9701970a7f7d722862e6
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-ldap-group-sync
+    tags: management,cronjob,ldap,group,sync
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-ldap-group-sync-0.0.2/cronjob-ldap-group-sync-0.0.2.tgz
+    version: 0.0.2
+  cronjob-ldap-group-sync-secure:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:09.404228855Z"
+    description: Scheduled Task to Perform LDAP Group Synchronization
+    digest: 03b348a1f3d1b5c68722da2efa7418205679aac2eb64a4cdffa5068d394766d3
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-ldap-group-sync-secure
+    tags: management,cronjob,ldap,group,sync
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-ldap-group-sync-secure-0.0.2/cronjob-ldap-group-sync-secure-0.0.2.tgz
+    version: 0.0.2
+  cronjob-prune-builds-deployments:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:09.565227858Z"
+    description: Scheduled Task to Prune Builds or Deployments
+    digest: 2de86fdf717d36a778d3e0c14a8e820e5a57b89d27b8dd867846a4f3605ce4be
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-prune-builds-deployments
+    tags: management,cronjob,prune,builds,deployments
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-prune-builds-deployments-0.0.2/cronjob-prune-builds-deployments-0.0.2.tgz
+    version: 0.0.2
+  cronjob-prune-images:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:09.751705178Z"
+    description: Scheduled Task to Prune Images from Internal Docker Registry
+    digest: 7f8f576ec5fa3f72e817f11a37a266017181f9e31f5ec97c700bdcc81984e327
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-prune-images
+    tags: management,cronjob,prune,images
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-prune-images-0.0.2/cronjob-prune-images-0.0.2.tgz
+    version: 0.0.2
+  cronjob-prune-projects:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:09.895258969Z"
+    digest: 019cfd28d6a060e92ff8f69dcaf61fb7a0357f25db0cc31ed9bb2887683bd440
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-prune-projects
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-prune-projects-0.0.2/cronjob-prune-projects-0.0.2.tgz
+    version: 0.0.2
+  cronjob-prune-tekton-pipelinerun:
+  - apiVersion: v2
+    created: "2022-10-11T08:06:10.056207472Z"
+    description: Scheduled task to prune pipelinerun from tekton
+    digest: 21f30fc81d6bbf7a0575d2e9ce974664bf921385ca4ad5f095292cc16a9c0b8d
+    maintainers:
+    - name: redhat-cop
+    name: cronjob-prune-tekton-pipelinerun
+    tags: management,cronjob,prune,tekton,pipelinerun
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/cronjob-prune-tekton-pipelinerun-0.0.2/cronjob-prune-tekton-pipelinerun-0.0.2.tgz
+    version: 0.0.2
+  gitlab-cleanup:
+  - apiVersion: v2
+    appVersion: v0.1.0
+    created: "2022-10-11T08:06:10.199323564Z"
+    description: A Helm chart to clean up stale gitlab groups and projects
+    digest: 9b90c12da8142c95529499e245d6ef8c94421db0145c5dbbe3e0d2b9916ef828
+    maintainers:
+    - name: redhat-cop
+    name: gitlab-cleanup
+    type: application
+    urls:
+    - https://github.com/redhat-cop/openshift-management/releases/download/gitlab-cleanup-0.1.1/gitlab-cleanup-0.1.1.tgz
+    version: 0.1.1
+generated: "2022-10-11T08:06:10.199331564Z"
