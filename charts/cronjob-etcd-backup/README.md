@@ -9,10 +9,12 @@ that the etcd backup is moved to external storage via a PVC.
 
 ## Use
 
+**Please do not use OpenShift pre-fixed namespaces, this is not recommended and won't work in the future.**
+
 ### Manual
 Installs and tests the helm chart
 ```bash
-helm upgrade --install cronjob-etcd-backup ./cronjob-etcd-backup --namespace openshift-etcd-backup --create-namespace
+helm upgrade --install cronjob-etcd-backup ./cronjob-etcd-backup --namespace system-etcd-backup --create-namespace
 helm test cronjob-etcd-backup
 ```
 
@@ -24,11 +26,11 @@ are many ways. Here is a start if you don't already have an opinion.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: openshift-etcd-backup
+  name: system-etcd-backup
 spec:
   destination:
     name: ''
-    namespace: openshift-etcd-backup
+    namespace: system-etcd-backup
     server: 'https://kubernetes.default.svc'
   source:
     path: charts/cronjob-etcd-backup
